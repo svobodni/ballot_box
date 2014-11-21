@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300,400italic,300italic,700italic&amp;subset=latin,latin-ext' rel='stylesheet' type='text/css' />
+  <link rel="stylesheet" type="text/css" media="screen" href="//web.svobodni.cz/cache/cssloader-42e8906c3e00.css?0" />
+  <script type="text/javascript" src="//web.svobodni.cz/cache/jsloader-eed39b02cf61.js?0"></script>
+  <link rel="stylesheet" href="//web.svobodni.cz/resources/siteModule/font-awesome/css/font-awesome.css" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="index, follow" />
+  <link rel="stylesheet" type="text/css" href="//web.svobodni.cz/cache/cssloader-d41d8cd98f00.css?0" />
+  <script type="text/javascript" src="//web.svobodni.cz/cache/jsloader-d41d8cd98f00.js?0"></script>
+  <script type="text/javascript" src="js/tinymce/tinymce.min.js"></script>
+  <script type="text/javascript" src="js/vs.js"></script>
+  <title>Svobodní | Volební systém</title>
+</head>
+<body>
+  <div class="container header-container">
+    <div class="row">
+      <div class="col-md-6 col-wb">
+        <div class="header-logo"><a href="/"></a></div>
+      </div>
+      <div class="col-md-6 col-wb">
+        {% if g.user %}
+          Přihlášen {{g.user.name}}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3"><a class="section" href="#">Aktuální volby</a></div>
+      <div class="col-md-3"><a class="section" href="#">Dřívější volby</a></div>
+      <div class="col-md-3"><a class="section" href="#">Hlasování</a></div>
+      <div class="col-md-3"><a class="section" href="#">Nastavení</a></div>
+    </div>
+    {% block body %}{% endblock %}
+    <hr>
+    <center><i>Interní systém. Provozuje <a href="http://www.svobodni.cz">Strana svobodných občanů</a>.</i></center>
+  </div>
+</body>
+</html>
