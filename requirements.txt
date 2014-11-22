@@ -1,4 +1,5 @@
 Flask
 Flask-SQLAlchemy
+sqlalchemy-utils
 Flask-WTF
 requests
