@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block body %}
+<table class="table">
+  <thead>
+    <tr><td>ID</td><td>Název</td><td>Popis</td><td>Stav</td></tr>
+  </thead>
+  <tbody>
+    {% for ballot in ballots %}
+      <tr>
+        <td>{{ballot.id}}</td>
+        <td>{{ballot.name}}</td>
+        <td>{{ballot.description}}</td>
+        <td>{{ballot.status}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -3,3 +3,5 @@ Flask-SQLAlchemy
 sqlalchemy-utils
 Flask-WTF
 requests
+Flask-Bootstrap
+WTForms-Alchemy

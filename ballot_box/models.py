@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from ballot_box import db
 from sqlalchemy_utils import ChoiceType
+import datetime
 
 
 class User(object):
-    def __init__(self, profile):
+    def __init__(self, profile, jwt=None):
         self.profile = profile
+        self.jwt = jwt
 
     @property
     def name(self):
@@ -49,6 +51,9 @@ class User(object):
                 self.is_central_presidium_member or
                 self.is_local_presidium_member)
 
+    def can_list_ballot(self):
+        return self.can_create_ballot()
+
 
 class Connection(db.Model):
     __tablename__ = "connection"
@@ -60,6 +65,7 @@ class Connection(db.Model):
     user_id = db.Column(db.Integer)
     name = db.Column(db.Unicode(100))
     profile = db.Column(db.UnicodeText)
+    jwt = db.Column(db.Text)
 
 
 class Ballot(db.Model):
@@ -72,26 +78,26 @@ class Ballot(db.Model):
         ("CANCELLED", u'Zrušeno')
     ]
     TYPES = [
-        ("VOTE", u'Hlasování'),
         ("ELECTION", u'Volba'),
+        ("VOTING", u'Hlasování')
     ]
     UNITS = [
-        ("ALL", u'Všichni'),
+        ("ALL", u'Republika'),
         ("REGION", u'Kraj'),
         ("BRANCH", u'Pobočka'),
-        ("ORGAN", u'Orgán'),
+        ("BODY", u'Orgán'),
     ]
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(100))
-    description = db.Column(db.UnicodeText)
-    begin_at = db.Column(db.DateTime)
-    finish_at = db.Column(db.DateTime)
-    status = db.Column(ChoiceType(STATUSES, impl=db.String(20)))
-    type = db.Column(ChoiceType(TYPES, impl=db.String(20)))
-    unit = db.Column(ChoiceType(UNITS, impl=db.String(20)))
-    unit_id = db.Column(db.Integer)
-    supporters_too = db.Column(db.Boolean)
-    max_votes = db.Column(db.Integer)
+    name = db.Column(db.Unicode(100), nullable=False, info={'label': u'Název'})
+    description = db.Column(db.UnicodeText, nullable=True, info={'label': u'Popis'})
+    begin_at = db.Column(db.DateTime, nullable=False, info={'label': u'Začátek'})
+    finish_at = db.Column(db.DateTime, nullable=False, info={'label': u'Konec'})
+    status = db.Column(ChoiceType(STATUSES, impl=db.String(20)), nullable=False, default="PLANNED",  info={'label': u'Stav'})
+    type = db.Column(ChoiceType(TYPES, impl=db.String(20)), nullable=False, info={'label': u'Druh'})
+    unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka'})
+    #unit_id = db.Column(db.Integer, nullable=False, info={'label': u'ID Jednotky'},)
+    supporters_too = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Také příznivci'})
+    max_votes = db.Column(db.Integer, default=1, nullable=False, info={'label': u'Max. hlasů'})
 
     options = db.relationship('BallotOption', backref='ballot',
                               lazy='select')
