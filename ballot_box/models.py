@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from ballot_box import db
 from sqlalchemy_utils import ChoiceType
+from wtforms import SelectField
 import datetime
 
 
@@ -22,11 +23,7 @@ class User(object):
 
     @property
     def is_party_supporter(self):
-        # TODO:
-        try:
-            return self.profile["person"]["type"] == "supporter"
-        except KeyError:
-            return False
+        return not self.is_party_member()
 
     @property
     def is_election_commission_member(self):
@@ -73,7 +70,6 @@ class Ballot(db.Model):
     STATUSES = [
         ("PLANNED", u'Plánováno'),
         ("APPROVED", u'Schváleno'),
-        ("IN_PROGRESS", u'Probíhá'),
         ("FINISHED", u'Ukončeno'),
         ("CANCELLED", u'Zrušeno')
     ]
@@ -82,10 +78,26 @@ class Ballot(db.Model):
         ("VOTING", u'Hlasování')
     ]
     UNITS = [
-        ("ALL", u'Republika'),
-        ("REGION", u'Kraj'),
-        ("BRANCH", u'Pobočka'),
-        ("BODY", u'Orgán'),
+        ('country,1', u'Cel\xe1 republika'),
+        ('region,1', u'Jiho\u010desk\xfd kraj'),
+        ('region,2', u'Jihomoravsk\xfd kraj'),
+        ('region,3', u'Karlovarsk\xfd kraj'),
+        ('region,4', u'Kr\xe1lov\xe9hradeck\xfd kraj'),
+        ('region,5', u'Libereck\xfd kraj'),
+        ('region,6', u'Moravskoslezsk\xfd kraj'),
+        ('region,7', u'Olomouck\xfd kraj'),
+        ('region,8', u'Pardubick\xfd kraj'),
+        ('region,9', u'Plze\u0148sk\xfd kraj'),
+        ('region,10', u'Praha'),
+        ('region,11', u'St\u0159edo\u010desk\xfd kraj'),
+        ('region,12', u'\xdasteck\xfd kraj'),
+        ('region,13', u'Kraj Vyso\u010dina'),
+        ('region,14', u'Zl\xednsk\xfd kraj'),
+        ('body,1', u'Republikov\xe9 p\u0159edsednictvo'),
+        ('body,2', u'Kontroln\xed komise'),
+        ('body,3', u'Volebn\xed komise'),
+        ('body,4', u'Rozhod\u010d\xed komise'),
+        ('body,5', u'Republikov\xfd v\xfdbor')
     ]
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(100), nullable=False, info={'label': u'Název'})
@@ -94,7 +106,7 @@ class Ballot(db.Model):
     finish_at = db.Column(db.DateTime, nullable=False, info={'label': u'Konec'})
     status = db.Column(ChoiceType(STATUSES, impl=db.String(20)), nullable=False, default="PLANNED",  info={'label': u'Stav'})
     type = db.Column(ChoiceType(TYPES, impl=db.String(20)), nullable=False, info={'label': u'Druh'})
-    unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka'})
+    unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka', 'form_field_class': SelectField})
     #unit_id = db.Column(db.Integer, nullable=False, info={'label': u'ID Jednotky'},)
     supporters_too = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Také příznivci'})
     max_votes = db.Column(db.Integer, default=1, nullable=False, info={'label': u'Max. hlasů'})

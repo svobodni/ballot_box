@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-from wtforms import SubmitField
+from wtforms import SubmitField, SelectField
 from models import Ballot
 from wtforms_components import DateRange
 from flask.ext.wtf import Form
@@ -9,6 +9,7 @@ from wtforms import validators
 # The variable db here is a SQLAlchemy object instance from
 # Flask-SQLAlchemy package
 from ballot_box import db
+from registry import registry_units
 
 # Workaround to fix lambdas in DateRange(min)
 from wtforms_components.widgets import BaseDateTimeInput
@@ -56,7 +57,7 @@ class BallotForm(ModelForm):
         field_args = {
             "name": {
                 "validators": [validators.Length(min=10)],
-                "description": u"Např. Volba přesedy Jihomoravského KrS",
+                "description": u"Např. Volba předsedy Jihomoravského KrS",
             },
             "begin_at": {
                 "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(hours=1), message=u"Začátek musí být nejméně za hodinu.")],
@@ -66,6 +67,6 @@ class BallotForm(ModelForm):
                 "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
                 "default": lambda: midnight(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
-            },
+            }
         }
 BallotForm.submit = SubmitField(u'Uložit')

@@ -2,12 +2,12 @@
 from ballot_box import app, db
 from models import Connection, User, Ballot
 from forms import BallotForm
+from registry import registry_request, registry_units
 from flask import (render_template, g, request, redirect, url_for, session,
-                   abort)
+                   abort, flash)
 from functools import wraps
 import json
 import datetime
-import requests
 from os import urandom
 from base64 import b64encode
 
@@ -16,36 +16,6 @@ def force_auth():
     return redirect(app.config["REGISTRY_URI"] +
                     "/auth/token?redirect_uri=" +
                     url_for('login', _external=True))
-
-
-def registry_request(resource, jwt=None):
-    if jwt is None:
-        jwt = request.args.get("jwt", None)
-        if jwt is None:
-            jwt = g.user.jwt
-    headers = {"Authorization": "Bearer {}".format(jwt)}
-    return requests.get(app.config["REGISTRY_URI"] + resource,
-                        headers=headers)
-
-
-def registry_units():
-    units = [("country,1", u"Celá republika")]
-    try:
-        r = registry_request("/regions.json")
-        regions = r.json()["regions"]
-        for region in regions:
-            units.append(("region,{}".format(region["id"]), region["name"]))
-    except KeyError:
-        pass
-
-    try:
-        r = registry_request("/bodies.json")
-        bodies = r.json()["bodies"]
-        for body in bodies:
-            units.append(("body,{}".format(body["id"]), body["name"]))
-    except KeyError:
-        pass
-    return units
 
 
 def login_required(f):
@@ -72,6 +42,7 @@ def login_required(f):
             return force_auth()
         return f(*args, **kwargs)
     return decorated_function
+
 
 @app.route("/")
 @login_required
@@ -121,6 +92,12 @@ def ballot_new():
     if not g.user.can_create_ballot():
         abort(403)
     form = BallotForm()
+    #form.unit.choices = registry_units()
     if form.validate_on_submit():
-        return render_template('ballot_new.html', form=form)
+        ballot = Ballot()
+        form.populate_obj(ballot)
+        db.session.add(ballot)
+        db.session.commit()
+        flash(u"Volba/hlasování bylo úspěšně přidáno.", "success")
+        return redirect(url_for("ballot_list"))
     return render_template('ballot_new.html', form=form)
