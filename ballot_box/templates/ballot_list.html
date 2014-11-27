@@ -2,8 +2,9 @@
 {% block body %}
 <div class="row">
   <div class="col-md-12">
+    <h3>Seznam voleb a hlasování</h3>
     {% if g.user.can_create_ballot %}
-      <a href="{{url_for('ballot_new')}}" class="btn btn-primary">Nová volba</a>  
+      <p><a href="{{url_for('ballot_new')}}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nová volba / hlasování</a></p>
     {% endif %}
     <table class="table table-bordered">
       <thead>
@@ -21,7 +22,7 @@
                 +Př.
               {% endif %}
             </td>
-            <td>{{ballot.options|length}}</td>
+            <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
             <td>{{ballot.begin_at}} až {{ballot.finish_at}}</td>
             <td>{{ballot.status}}</td>
             <td>

@@ -155,3 +155,11 @@ def ballot_options(ballot_id):
               .format(added, removed, unchanged), "success")
         return redirect(url_for("ballot_list"))
     return render_template('ballot_options.html', ballot=ballot)
+
+
+@app.route("/polling_station/")
+@login_required
+def polling_station():
+    # TODO: filter ballots
+    ballots = db.session.query(Ballot).order_by(Ballot.id.desc())
+    return render_template('polling_station.html', ballots=ballots)

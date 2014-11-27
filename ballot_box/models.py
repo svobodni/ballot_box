@@ -152,7 +152,7 @@ class Voters(db.Model):
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
     name = db.Column(db.Unicode(100))
     email = db.Column(db.Unicode(100))
-    user_id = db.Column(db.Integer)
+    person_id = db.Column(db.Integer)
     voted_at = db.Column(db.DateTime)
     remote_addr = db.Column(db.String(50))
     user_agent = db.Column(db.String(500))

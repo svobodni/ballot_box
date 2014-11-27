@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Volební místnost</h3>
+    {% for ballot in ballots %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ballot.name}}</h3>
+        </div>
+        <div class="panel-body">
+          <p class="pre">{{ballot.description}}</p>
+          <p>
+            Typ: {{ballot.type}}<br/>
+            Termín: {{ballot.begin_at}} až {{ballot.finish_at}}<br/>
+            Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
+            Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}
+          </p>
+          <p><a href="#" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a></p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
