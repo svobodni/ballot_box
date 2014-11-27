@@ -70,3 +70,26 @@ class BallotForm(ModelForm):
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
+
+
+class BallotEditForm(ModelForm):
+    class Meta:
+        model = Ballot
+        only = ["type", "name", "description", "unit",
+                "supporters_too", "max_votes", "begin_at", "finish_at",
+                "status"]
+        field_args = {
+            "name": {
+                "validators": [validators.Length(min=10)],
+            },
+            "begin_at": {
+                "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(minutes=5), message=u"Začátek musí být nejméně za 5 minut.")],
+                "default": lambda: morning(),
+            },
+            "finish_at": {
+                "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
+                "default": lambda: midnight(),
+                "description": u"Trvání musí být nejméně 72 hodin.",
+            }
+        }
+BallotEditForm.submit = SubmitField(u'Uložit')

@@ -51,6 +51,12 @@ class User(object):
     def can_list_ballot(self):
         return self.can_create_ballot()
 
+    def can_edit_ballot(self):
+        return self.can_create_ballot()
+
+    def can_edit_ballot_options(self):
+        return self.can_edit_ballot()
+
 
 class Connection(db.Model):
     __tablename__ = "connection"
@@ -112,7 +118,15 @@ class Ballot(db.Model):
     max_votes = db.Column(db.Integer, default=1, nullable=False, info={'label': u'Max. hlasů'})
 
     options = db.relationship('BallotOption', backref='ballot',
-                              lazy='select')
+                              lazy='select', order_by="BallotOption.title")
+
+    def in_time_progress(self):
+        now = datetime.datetime.now()
+        return self.begin_at < now < self.finish_at
+
+    def in_time_finished(self):
+        now = datetime.datetime.now()
+        return self.finish_at < now
 
 
 class BallotOption(db.Model):

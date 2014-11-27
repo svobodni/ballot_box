@@ -5,19 +5,33 @@
     {% if g.user.can_create_ballot %}
       <a href="{{url_for('ballot_new')}}" class="btn btn-primary">Nová volba</a>  
     {% endif %}
-    <table class="table">
+    <table class="table table-bordered">
       <thead>
-        <tr><th>ID</th><th>Název</th><th>Popis</th><th>Typ</th><th>Trvání</th><th>Stav</th></tr>
+        <tr><th>Název</th><th>Popis</th><th>Typ</th><th>Jednotka</th><th>Možnosti</th><th>Trvání</th><th>Stav</th><th>Akce</th></tr>
       </thead>
       <tbody>
         {% for ballot in ballots %}
           <tr>
-            <td>{{ballot.id}}</td>
             <td>{{ballot.name}}</td>
             <td class="pre">{{ballot.description}}</td>
             <td>{{ballot.type}}</td>
+            <td>
+              {{ballot.unit}}
+              {% if ballot.supporters_too %}
+                +Př.
+              {% endif %}
+            </td>
+            <td>{{ballot.options|length}}</td>
             <td>{{ballot.begin_at}} až {{ballot.finish_at}}</td>
             <td>{{ballot.status}}</td>
+            <td>
+              {% if not ballot.in_time_progress() %}
+                <a href="{{url_for('ballot_edit', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
+                <a href="{{url_for('ballot_options', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Možnosti/kandidáti"><i class="fa fa-users"></i></a>
+              {% else %}
+                Probíhá
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
