@@ -15,7 +15,15 @@
           <tr>
             <td>{{ballot.name}}</td>
             <td class="pre">{{ballot.description}}</td>
-            <td>{{ballot.type}}</td>
+            <td>
+              {{ballot.type}}
+              {% if ballot.is_yes_no %}
+                <i class="fa fa-thumbs-up"></i>/<i class="fa fa-thumbs-down"></i>
+              {% else %}
+                <i class="fa fa-sort-numeric-asc"></i>
+              {% endif %}
+
+            </td>
             <td>
               {{ballot.unit}}
               {% if ballot.supporters_too %}

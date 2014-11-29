@@ -1,18 +1,10 @@
 {% extends "base.html" %}
 {% block body %}
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#add-pro-proti").click(function() {
-      $($(".bo-new")[0]).val("PRO NÁVRH");
-      $($(".bo-new")[1]).val("PROTI NÁVRHU");
-    })
-  });
-</script>
 <div class="row">
   <div class="col-md-8 col-md-offset-2">
     <h3>Upravit možnosti nebo kandidáty</h3>
-    <p><button id="add-pro-proti" class="btn btn-default btn-sm">Přidat PRO NÁVRH / PROTI NÁVRHU</button></p>
     <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <ul>
         {% for option in ballot.options %}
           <li>

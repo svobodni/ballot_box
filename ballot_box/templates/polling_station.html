@@ -1,3 +1,4 @@
+{% from '_macros.html' import ballot_details %}
 {% extends "base.html" %}
 {% block body %}
 <div class="row">
@@ -10,13 +11,8 @@
         </div>
         <div class="panel-body">
           <p class="pre">{{ballot.description}}</p>
-          <p>
-            Typ: {{ballot.type}}<br/>
-            Termín: {{ballot.begin_at}} až {{ballot.finish_at}}<br/>
-            Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
-            Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}
-          </p>
-          <p><a href="#" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a></p>
+          {{ ballot_details(ballot) }}
+          <p><a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a></p>
         </div>
       </div>
     {% endfor %}

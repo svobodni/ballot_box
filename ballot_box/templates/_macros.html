@@ -1,0 +1,8 @@
+{% macro ballot_details(ballot) -%}
+  <p>
+    Typ: {{ballot.type}} &nbsp;&nbsp; Vyhodnocení: {{ballot.method}}<br/>
+    Termín: {{ballot.begin_at}} až {{ballot.finish_at}}<br/>
+    Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
+    Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}
+  </p>
+{%- endmacro %}

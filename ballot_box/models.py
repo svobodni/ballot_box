@@ -2,6 +2,7 @@
 from ballot_box import db
 from sqlalchemy_utils import ChoiceType
 from wtforms import SelectField
+from sqlalchemy.schema import UniqueConstraint
 import datetime
 
 
@@ -13,6 +14,14 @@ class User(object):
     @property
     def name(self):
         return self.profile["person"]["name"]
+
+    @property
+    def email(self):
+        return self.profile["person"]["email"]
+
+    @property
+    def id(self):
+        return self.profile["person"]["id"]
 
     @property
     def is_party_member(self):
@@ -56,6 +65,53 @@ class User(object):
 
     def can_edit_ballot_options(self):
         return self.can_edit_ballot()
+
+    def is_in_unit(self, unit_type, unit_id):
+        if unit_type == "country":
+            return True
+        elif unit_type == "body":
+            try:
+                for role in self.profile["person"]["roles"]:
+                    if role["organization"]["id"] == unit_id:
+                        return True
+            except KeyError:
+                pass
+        elif unit_type == "region":
+            try:
+                # TODO: is this really correct?
+                if "guest_region" in self.profile["person"]:
+                    region = self.profile["person"]["guest_region"]
+                else:
+                    region = self.profile["person"]["domestic_region"]
+
+                if region["id"] == unit_id:
+                        return True
+            except KeyError:
+                pass
+
+        return False
+
+    def has_right_to_vote(self, ballot):
+        if not ballot.supporters_too and not self.is_party_member:
+            return False
+        (unit_type, unit_id) = tuple(ballot.unit.code.split(','))
+        return self.is_in_unit(unit_type, unit_id)
+
+    def already_voted(self, ballot):
+        return bool(ballot.voters.filter(Voter.person_id == self.id).first())
+
+    def can_vote(self, ballot):
+        return self.has_right_to_vote(ballot) and not self.already_voted(ballot)
+
+    @property
+    def votable_unit_codes(self):
+        # TODO: make more efficient
+        unit_codes = []
+        for (unit_code, unit_value) in Ballot.UNITS:
+            (unit_type, unit_id) = tuple(unit_code.split(','))
+            if self.is_in_unit(unit_type, unit_id):
+                unit_codes.append(unit_code)
+        return unit_codes
 
 
 class Connection(db.Model):
@@ -113,12 +169,12 @@ class Ballot(db.Model):
     status = db.Column(ChoiceType(STATUSES, impl=db.String(20)), nullable=False, default="PLANNED",  info={'label': u'Stav'})
     type = db.Column(ChoiceType(TYPES, impl=db.String(20)), nullable=False, info={'label': u'Druh'})
     unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka', 'form_field_class': SelectField})
-    #unit_id = db.Column(db.Integer, nullable=False, info={'label': u'ID Jednotky'},)
     supporters_too = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Také příznivci'})
     max_votes = db.Column(db.Integer, default=1, nullable=False, info={'label': u'Max. hlasů'})
 
     options = db.relationship('BallotOption', backref='ballot',
                               lazy='select', order_by="BallotOption.title")
+    voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
 
     def in_time_progress(self):
         now = datetime.datetime.now()
@@ -127,6 +183,20 @@ class Ballot(db.Model):
     def in_time_finished(self):
         now = datetime.datetime.now()
         return self.finish_at < now
+
+    @property
+    def is_election(self):
+        return self.type == "ELECTION"
+
+    @property
+    def is_yes_no(self):
+        return len(self.options) <= self.max_votes
+
+    @property
+    def method(self):
+        if self.is_yes_no:
+            return u"PRO NÁVRH / PROTI NÁVRHU"
+        return u"podle pořadí počtu získaných hlasů"
 
 
 class BallotOption(db.Model):
@@ -143,11 +213,13 @@ class Vote(db.Model):
     __tablename__ = "vote"
     id = db.Column(db.Integer, primary_key=True)
     ballot_option_id = db.Column(db.Integer, db.ForeignKey('ballot_option.id'))
-    hash = db.Column(db.Unicode(100))
+    value = db.Column(db.Integer)
+    hash_digest = db.Column(db.Unicode(100))
 
 
-class Voters(db.Model):
-    __tablename__ = "voters"
+class Voter(db.Model):
+    __tablename__ = "voter"
+    __table_args__ = (UniqueConstraint("ballot_id", "person_id"),)
     id = db.Column(db.Integer, primary_key=True)
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
     name = db.Column(db.Unicode(100))

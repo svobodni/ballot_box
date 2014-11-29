@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 from ballot_box import app, db
-from models import Connection, User, Ballot, BallotOption
+from models import Connection, User, Ballot, BallotOption, Vote, Voter
 from forms import BallotForm, BallotEditForm
 from registry import registry_request, registry_units
 from flask import (render_template, g, request, redirect, url_for, session,
                    abort, flash)
+from wtforms.validators import ValidationError
 from functools import wraps
 import json
+import pickle
 import datetime
 from os import urandom
 from base64 import b64encode
+import hashlib
 
 
 def force_auth():
@@ -107,7 +110,7 @@ def ballot_new():
 def ballot_edit(ballot_id):
     if not g.user.can_edit_ballot():
         abort(403)
-    ballot = db.session.query(Ballot).filter(Ballot.id == ballot_id).first()
+    ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
     if ballot.in_time_progress():
@@ -127,7 +130,7 @@ def ballot_edit(ballot_id):
 def ballot_options(ballot_id):
     if not g.user.can_edit_ballot_options():
         abort(403)
-    ballot = db.session.query(Ballot).filter(Ballot.id == ballot_id).first()
+    ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
     if ballot.in_time_progress():
@@ -158,8 +161,132 @@ def ballot_options(ballot_id):
 
 
 @app.route("/polling_station/")
+@app.route("/volebni_mistnost/")
 @login_required
 def polling_station():
     # TODO: filter ballots
     ballots = db.session.query(Ballot).order_by(Ballot.id.desc())
     return render_template('polling_station.html', ballots=ballots)
+
+
+@app.route("/polling_station/<int:ballot_id>/")
+@app.route("/volebni_mistnost/<int:ballot_id>/")
+@login_required
+def polling_station_item(ballot_id):
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if not g.user.can_vote(ballot):
+        abort(403)
+    if request.method == 'POST':
+        pass
+    return render_template('polling_station_item.html', ballot=ballot)
+
+
+def validate_options(input_options, ballot):
+    allowed_option_ids = set(option.id for option in ballot.options)
+    invalid_options = set(input_options.keys())-allowed_option_ids
+    if len(invalid_options) > 0:
+        raise ValidationError(u"Možnost/i ID {} jsou neplatné."
+                              .format(", ".join(invalid_options)))
+    if not ballot.is_yes_no and any(value != 1 for value in input_options.values()):
+        raise ValidationError(u"Lze udílet pouze hlasy PRO (+1).")
+    elif ballot.is_yes_no and any(value != 1 and value != -1 for value in input_options.values()):
+        raise ValidationError(u"Lze udílet pouze hlasy PRO NÁVRH (+1) a PROTI NÁVRHU (-1).")
+    if len(input_options) == 0:
+        raise ValidationError(u"Musíte udělit nejméně jeden hlas.")
+    if len(input_options) > ballot.max_votes:
+        raise ValidationError(u"Můžete udělit nejvýše {} hlasů.".format(ballot.max_votes))
+    return True
+
+
+@app.route("/polling_station/<int:ballot_id>/confirm", methods=('POST',))
+@app.route("/volebni_mistnost/<int:ballot_id>/potvrdit", methods=('POST',))
+@login_required
+def polling_station_confirm(ballot_id):
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if not g.user.can_vote(ballot):
+        abort(403)
+
+    input_options = {}
+    try:
+        for key in request.form.keys():
+            key_split = key.split(',')
+            if len(key_split) == 2 and key_split[0] == 'option':
+                option_id = int(key_split[1])
+                if option_id in input_options:
+                    raise ValidationError(u"Možnost ID {} zvolena vícekrát."
+                                          .format(option_id))
+                else:
+                    input_options[option_id] = int(request.form[key])
+        validate_options(input_options, ballot)
+    except ValidationError as e:
+        flash(unicode(e), "danger")
+        return redirect(url_for('polling_station_item', ballot_id=ballot_id))
+    except ValueError as e:
+        flash(u"Některý z hlasů má neplatnou hodnotu", "danger")
+        return redirect(url_for('polling_station_item', ballot_id=ballot_id))
+
+    title_dict = {option.id: option.title for option in ballot.options}
+    summary = [{"title": title_dict[option_id], "value":input_options[option_id]}
+               for option_id in sorted(input_options.keys(), key=lambda x: title_dict[x])]
+    input_options_pickle = pickle.dumps(input_options)
+    hash_base = "{}*{}*{}*{}".format(ballot_id, g.user.id, input_options, b64encode(urandom(30))[:15])
+
+    return render_template('polling_station_confirm.html',
+                           ballot=ballot,
+                           options_summary=summary,
+                           input_options_data=input_options_pickle,
+                           hash_base=hash_base)
+
+
+@app.route("/polling_station/<int:ballot_id>/vote", methods=('POST',))
+@app.route("/volebni_mistnost/<int:ballot_id>/hlasovat", methods=('POST',))
+@login_required
+def polling_station_vote(ballot_id):
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if not g.user.can_vote(ballot):
+        abort(403)
+
+    input_options = pickle.loads(request.form["input_options_data"])
+    print(input_options)
+    try:
+        validate_options(input_options, ballot)
+    except ValidationError as e:
+        flash(unicode(e), "danger")
+        return redirect(url_for('polling_station_item', ballot_id=ballot_id))
+    except ValueError as e:
+        flash(u"Některý z hlasů má neplatnou hodnotu", "danger")
+        return redirect(url_for('polling_station_item', ballot_id=ballot_id))
+
+    hash_base = request.form["hash_base"]
+    h = hashlib.sha1()
+    h.update(hash_base)
+    # h.update(urandom(30))
+    hash_digest = h.hexdigest()
+
+    for (option_id, value) in input_options.items():
+        vote = Vote()
+        vote.ballot_option_id = option_id
+        vote.value = value
+        vote.hash_digest = hash_digest
+        db.session.add(vote)
+
+    voter = Voter()
+    voter.ballot_id = ballot_id
+    voter.name = g.user.name
+    voter.email = g.user.email
+    voter.person_id = g.user.id
+    voter.voted_at = datetime.datetime.now()
+    voter.remote_addr = request.remote_addr
+    voter.user_agent = request.user_agent.string
+    db.session.add(voter)
+
+    db.session.commit()
+
+    return render_template('polling_station_vote.html',
+                           ballot=ballot, hash_digest=hash_digest)
