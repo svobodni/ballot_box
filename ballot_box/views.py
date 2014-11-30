@@ -179,7 +179,9 @@ def polling_station_item(ballot_id):
         abort(404)
     if not g.user.can_vote(ballot):
         abort(403)
-    return render_template('polling_station_item.html', ballot=ballot)
+    if ballot.is_yes_no:
+        return render_template('polling_station_mark_yes_no.html', ballot=ballot)
+    return render_template('polling_station_mark_regular.html', ballot=ballot)
 
 
 def validate_options(input_options, ballot):
@@ -218,7 +220,7 @@ def polling_station_confirm(ballot_id):
                 if option_id in input_options:
                     raise ValidationError(u"Možnost ID {} zvolena vícekrát."
                                           .format(option_id))
-                else:
+                elif request.form[key]:
                     input_options[option_id] = int(request.form[key])
         validate_options(input_options, ballot)
     except ValidationError as e:

@@ -30,7 +30,7 @@
                 <small>PRO NÁVRH:</small> {{option["votes"][1]|length}}&nbsp;&nbsp;
               {% endif %}
               {% if option["votes"][-1]|length > 0 %}
-                <small>PROTI NÁVRHU:<small> {{option["votes"][-1]|length}}
+                <small>PROTI NÁVRHU:</small> {{option["votes"][-1]|length}}
               {% endif %}
               <div class="hashes hidden">
                 {% if option["votes"][1]|length > 0 %}

@@ -1,0 +1,49 @@
+{% from '_macros.html' import ballot_details %}
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Hlasovat</h3>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ballot.name}}</h3>
+      </div>
+      <div class="panel-body">
+        <p class="pre">{{ballot.description}}</p>
+        {{ ballot_details(ballot) }}
+      </div>
+      <hr/>
+      <div class="panel-body">
+        <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          {% for option in ballot.options %}
+            <div  class="form-group">
+            <label>{{option.title}}</label>
+            <div class="radio">
+              <label>
+                <input type="radio" class="ballot-option" name="option,{{option.id}}" value="1">
+                PRO NÁVRH
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" class="ballot-option" name="option,{{option.id}}" value="-1">
+                PROTI NÁVRHU
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" class="ballot-option" name="option,{{option.id}}" value="" checked>
+                nehlasovat
+              </label>
+            </div>
+            </div>
+          {% endfor %}
+          <p class="text-muted" id="remaining-votes-count"></p>
+          <button id="btn-continue" type="submit" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Pokračovat k potvrzení</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
