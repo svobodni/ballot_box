@@ -206,7 +206,7 @@ class BallotOption(db.Model):
     title = db.Column(db.Unicode(100))
 
     votes = db.relationship('Vote', backref='ballot_option',
-                            lazy='dynamic')
+                            lazy='dynamic', order_by="Vote.hash_digest")
 
 
 class Vote(db.Model):

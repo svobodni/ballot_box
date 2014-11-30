@@ -1,0 +1,50 @@
+{% from '_macros.html' import ballot_details %}
+{% extends "base.html" %}
+{% block body %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#show-hashes").click(function() {
+      $(".hashes").toggleClass("hidden");
+    });
+  });
+</script>
+<div class="row">
+  <div class="col-md-12">
+    <h3>Výsledek volby nebo hlasování</h3>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ballot.name}}</h3>
+      </div>
+      <div class="panel-body">
+        <p class="pre">{{ballot.description}}</p>
+        {{ ballot_details(ballot) }}
+      </div>
+      <hr/>
+      <div class="panel-body">
+        <p><button id="show-hashes" class="btn btn-default">Zobrazit kontrolní řeztězce</button></p>
+        <ol>
+          {% for option in result %}
+            <li>
+              {% if option["elected"] %}<strong>{% endif %}{{option["title"]}}{% if option["elected"] %}</strong>{% endif %}
+              {% if option["votes"][1]|length > 0 %}
+                <small>PRO NÁVRH:</small> {{option["votes"][1]|length}}&nbsp;&nbsp;
+              {% endif %}
+              {% if option["votes"][-1]|length > 0 %}
+                <small>PROTI NÁVRHU:<small> {{option["votes"][-1]|length}}
+              {% endif %}
+              <div class="hashes hidden">
+                {% if option["votes"][1]|length > 0 %}
+                  <div>PRO NÁVRH<br/><samp class="small">{{option["votes"][1]|join(" ")}}</samp></div>
+                {% endif %}
+                {% if option["votes"][-1]|length > 0 %}
+                  <div>PROTI NÁVRHU<br/><samp  class="small">{{option["votes"][-1]|join(" ")}}</samp></div>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

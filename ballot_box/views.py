@@ -7,6 +7,7 @@ from flask import (render_template, g, request, redirect, url_for, session,
                    abort, flash)
 from wtforms.validators import ValidationError
 from functools import wraps
+from collections import defaultdict
 import json
 import pickle
 import datetime
@@ -178,8 +179,6 @@ def polling_station_item(ballot_id):
         abort(404)
     if not g.user.can_vote(ballot):
         abort(403)
-    if request.method == 'POST':
-        pass
     return render_template('polling_station_item.html', ballot=ballot)
 
 
@@ -200,8 +199,8 @@ def validate_options(input_options, ballot):
     return True
 
 
-@app.route("/polling_station/<int:ballot_id>/confirm", methods=('POST',))
-@app.route("/volebni_mistnost/<int:ballot_id>/potvrdit", methods=('POST',))
+@app.route("/polling_station/<int:ballot_id>/confirm/", methods=('POST',))
+@app.route("/volebni_mistnost/<int:ballot_id>/potvrdit/", methods=('POST',))
 @login_required
 def polling_station_confirm(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
@@ -242,8 +241,8 @@ def polling_station_confirm(ballot_id):
                            hash_base=hash_base)
 
 
-@app.route("/polling_station/<int:ballot_id>/vote", methods=('POST',))
-@app.route("/volebni_mistnost/<int:ballot_id>/hlasovat", methods=('POST',))
+@app.route("/polling_station/<int:ballot_id>/vote/", methods=('POST',))
+@app.route("/volebni_mistnost/<int:ballot_id>/hlasovat/", methods=('POST',))
 @login_required
 def polling_station_vote(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
@@ -290,3 +289,47 @@ def polling_station_vote(ballot_id):
 
     return render_template('polling_station_vote.html',
                            ballot=ballot, hash_digest=hash_digest)
+
+
+@app.route("/polling_station/<int:ballot_id>/result/")
+@app.route("/volebni_mistnost/<int:ballot_id>/vysledek/")
+@login_required
+def polling_station_result(ballot_id):
+    # TODO: only allow finished ballots
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    result = []
+    for db_option in ballot.options:
+        option = {
+            "title": db_option.title,
+            "votes": defaultdict(list),
+            "elected": False,
+        }
+        for db_vote in db_option.votes:
+            option["votes"][db_vote.value].append(db_vote.hash_digest)
+        result.append(option)
+    if ballot.is_yes_no:
+        for option in result:
+            if len(option["votes"][1]) > len(option["votes"][-1]):
+                option["elected"] = True
+            option["order_by"] = len(option["votes"][1]) - len(option["votes"][-1])
+        result = sorted(result, key=lambda x: -x["order_by"])
+    else:
+        for option in result:
+            option["order_by"] = len(option["votes"][1])
+        result = sorted(result, key=lambda x: -x["order_by"])
+        places_left = ballot.max_votes
+        current_place = [result[0]]
+        current_votes = result[0]["order_by"]
+        for i in range(1, len(result)):
+            if result[i]["order_by"] < current_votes and places_left >= 0:
+                for r in current_place:
+                    if r["order_by"] > 0:
+                        r["elected"] = True
+                current_place = []
+            current_votes = result[i]["order_by"]
+            current_place.append(result[i])
+            places_left -= 1
+
+    return render_template('polling_station_result.html', ballot=ballot, result=result)
