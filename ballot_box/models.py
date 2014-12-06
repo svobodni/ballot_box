@@ -95,7 +95,7 @@ class User(object):
         if not ballot.supporters_too and not self.is_party_member:
             return False
         (unit_type, unit_id) = tuple(ballot.unit.code.split(','))
-        return self.is_in_unit(unit_type, unit_id)
+        return self.is_in_unit(unit_type, int(unit_id))
 
     def already_voted(self, ballot):
         return bool(ballot.voters.filter(Voter.person_id == self.id).first())
@@ -109,7 +109,7 @@ class User(object):
         unit_codes = []
         for (unit_code, unit_value) in Ballot.UNITS:
             (unit_type, unit_id) = tuple(unit_code.split(','))
-            if self.is_in_unit(unit_type, unit_id):
+            if self.is_in_unit(unit_type, int(unit_id)):
                 unit_codes.append(unit_code)
         return unit_codes
 
@@ -129,12 +129,6 @@ class Connection(db.Model):
 
 class Ballot(db.Model):
     __tablename__ = "ballot"
-    STATUSES = [
-        ("PLANNED", u'Plánováno'),
-        ("APPROVED", u'Schváleno'),
-        ("FINISHED", u'Ukončeno'),
-        ("CANCELLED", u'Zrušeno')
-    ]
     TYPES = [
         ("ELECTION", u'Volba'),
         ("VOTING", u'Hlasování')
@@ -166,7 +160,8 @@ class Ballot(db.Model):
     description = db.Column(db.UnicodeText, nullable=True, info={'label': u'Popis'})
     begin_at = db.Column(db.DateTime, nullable=False, info={'label': u'Začátek'})
     finish_at = db.Column(db.DateTime, nullable=False, info={'label': u'Konec'})
-    status = db.Column(ChoiceType(STATUSES, impl=db.String(20)), nullable=False, default="PLANNED",  info={'label': u'Stav'})
+    approved = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Schváleno'})
+    cancelled = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Zrušeno'})
     type = db.Column(ChoiceType(TYPES, impl=db.String(20)), nullable=False, info={'label': u'Druh'})
     unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka', 'form_field_class': SelectField})
     supporters_too = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Také příznivci'})
@@ -176,13 +171,23 @@ class Ballot(db.Model):
                               lazy='select', order_by="BallotOption.title")
     voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
 
+    @property
     def in_time_progress(self):
         now = datetime.datetime.now()
         return self.begin_at < now < self.finish_at
 
+    @property
     def in_time_finished(self):
         now = datetime.datetime.now()
         return self.finish_at < now
+
+    @property
+    def in_progress(self):
+        return self.approved and not self.cancelled and self.in_time_progress
+
+    @property
+    def is_finished(self):
+        return self.in_time_finished
 
     @property
     def is_election(self):

@@ -16,6 +16,22 @@ from base64 import b64encode
 import hashlib
 
 
+class BallotBoxError(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+
 def force_auth():
     return redirect(app.config["REGISTRY_URI"] +
                     "/auth/token?redirect_uri=" +
@@ -46,6 +62,22 @@ def login_required(f):
             return force_auth()
         return f(*args, **kwargs)
     return decorated_function
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(403)
+def page_not_found(e):
+    return render_template('403.html'), 403
+
+
+@app.errorhandler(BallotBoxError)
+def handle_ballot_box_error(error):
+    return (render_template('error.html', message=error.message),
+            error.status_code)
 
 
 @app.route("/")
@@ -114,7 +146,7 @@ def ballot_edit(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress():
+    if ballot.in_time_progress:
         abort(403)
     form = BallotEditForm(request.form, ballot)
     if form.validate_on_submit():
@@ -134,7 +166,7 @@ def ballot_options(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress():
+    if ballot.in_time_progress:
         abort(403)
     if request.method == 'POST':
         added = 0
@@ -160,14 +192,59 @@ def ballot_options(ballot_id):
         return redirect(url_for("ballot_list"))
     return render_template('ballot_options.html', ballot=ballot)
 
+@app.route("/ballot/<int:ballot_id>/preview/", methods=('GET', 'POST'))
+@login_required
+def ballot_preview(ballot_id):
+    if not g.user.can_edit_ballot_options():
+        abort(403)
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if ballot.is_yes_no:
+        return render_template('polling_station_mark_yes_no.html', ballot=ballot)
+    return render_template('polling_station_mark_regular.html', ballot=ballot)
+
 
 @app.route("/polling_station/")
 @app.route("/volebni_mistnost/")
 @login_required
 def polling_station():
-    # TODO: filter ballots
-    ballots = db.session.query(Ballot).order_by(Ballot.id.desc())
-    return render_template('polling_station.html', ballots=ballots)
+    ballots = (db.session.query(Ballot)
+               .filter(Ballot.approved == True)
+               .filter(Ballot.finish_at >
+                       datetime.datetime.now()-datetime.timedelta(days=60))
+               .order_by(Ballot.id.desc()))
+    ballot_groups = {
+        "not_voted": [],
+        "already_voted": [],
+        "finished": [],
+        "other": []
+    }
+    for ballot in ballots:
+        if ballot.is_finished:
+            ballot_groups["finished"].append(ballot)
+        elif g.user.already_voted(ballot):
+            ballot_groups["already_voted"].append(ballot)
+        elif g.user.can_vote(ballot) and ballot.in_progress:
+            ballot_groups["not_voted"].append(ballot)
+        else:
+            ballot_groups["other"].append(ballot)
+    return render_template('polling_station.html', ballot_groups=ballot_groups)
+
+
+def permit_voting(ballot):
+    if g.user.already_voted(ballot):
+        raise BallotBoxError(u"Již jste hlasoval/a.", 403)
+    if not g.user.can_vote(ballot):
+        raise BallotBoxError(u"Nemáte právo hlasovat.", 403)
+    if ballot.cancelled:
+        raise BallotBoxError(u"Tato volba byla zrušena.", 404)
+    if ballot.is_finished:
+        raise BallotBoxError(u"Tato volba již skončila.", 404)
+    if not ballot.approved:
+        raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 404)
+    if not ballot.in_progress:
+        raise BallotBoxError(u"Tato volba nyní neprobíhá.", 404)
 
 
 @app.route("/polling_station/<int:ballot_id>/")
@@ -177,8 +254,7 @@ def polling_station_item(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if not g.user.can_vote(ballot):
-        abort(403)
+    permit_voting(ballot)
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html', ballot=ballot)
     return render_template('polling_station_mark_regular.html', ballot=ballot)
@@ -208,8 +284,7 @@ def polling_station_confirm(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if not g.user.can_vote(ballot):
-        abort(403)
+    permit_voting(ballot)
 
     input_options = {}
     try:
@@ -250,8 +325,7 @@ def polling_station_vote(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if not g.user.can_vote(ballot):
-        abort(403)
+    permit_voting(ballot)
 
     input_options = pickle.loads(request.form["input_options_data"])
     print(input_options)
@@ -297,10 +371,16 @@ def polling_station_vote(ballot_id):
 @app.route("/volebni_mistnost/<int:ballot_id>/vysledek/")
 @login_required
 def polling_station_result(ballot_id):
-    # TODO: only allow finished ballots
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
+    if ballot.cancelled:
+        raise BallotBoxError(u"Tato volba byla zrušena.", 404)
+    if not ballot.is_finished:
+        raise BallotBoxError(u"Tato volba ještě probíhá.", 404)
+    if not ballot.approved:
+        raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 404)
+
     result = []
     for db_option in ballot.options:
         option = {

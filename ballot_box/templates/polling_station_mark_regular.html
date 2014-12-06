@@ -1,4 +1,4 @@
-{% from '_macros.html' import ballot_details %}
+{% from '_macros.html' import ballot_panel_template %}
 {% extends "base.html" %}
 {% block body %}
 <script type="text/javascript">
@@ -36,31 +36,21 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Hlasovat</h3>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">{{ballot.name}}</h3>
-      </div>
-      <div class="panel-body">
-        <p class="pre">{{ballot.description}}</p>
-        {{ ballot_details(ballot) }}
-      </div>
-      <hr/>
-      <div class="panel-body">
-        <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-          {% for option in ballot.options %}
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">
-                {{option.title}}
-              </label>
-            </div>
-          {% endfor %}
-          <p class="text-muted" id="remaining-votes-count"></p>
-          <button id="btn-continue" type="submit" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Pokračovat k potvrzení</button>
-        </form>
-      </div>
-    </div>
+    {% call ballot_panel_template(ballot) %}
+      <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        {% for option in ballot.options %}
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">
+              {{option.title}}
+            </label>
+          </div>
+        {% endfor %}
+        <p class="text-muted" id="remaining-votes-count"></p>
+        <button id="btn-continue" type="submit" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Pokračovat k potvrzení</button>
+      </form>
+    {% endcall %}
   </div>
 </div>
 {% endblock %}

@@ -77,7 +77,7 @@ class BallotEditForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
-                "status"]
+                "approved", "cancelled"]
         field_args = {
             "name": {
                 "validators": [validators.Length(min=10)],

@@ -20,7 +20,7 @@
               {% if ballot.is_yes_no %}
                 <i class="fa fa-thumbs-up"></i>/<i class="fa fa-thumbs-down"></i>
               {% else %}
-                <i class="fa fa-sort-numeric-asc"></i>
+                <i class="fa fa-list-ol"></i>
               {% endif %}
 
             </td>
@@ -32,13 +32,26 @@
             </td>
             <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
             <td>{{ballot.begin_at}} až {{ballot.finish_at}}</td>
-            <td>{{ballot.status}}</td>
             <td>
-              {% if not ballot.in_time_progress() %}
+              {% if ballot.approved %}
+                <span class="label label-success">Schváleno</span>
+              {% endif %}
+              {% if ballot.cancelled %}
+                <span class="label label-danger">Zrušeno</span>
+              {% endif %}
+              {% if not ballot.approved and not ballot.cancelled %}
+                <span class="label label-info">Nové</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not ballot.in_time_progress and not ballot.in_time_finished %}
                 <a href="{{url_for('ballot_edit', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
                 <a href="{{url_for('ballot_options', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Možnosti/kandidáti"><i class="fa fa-users"></i></a>
-              {% else %}
+                <a href="{{url_for('ballot_preview', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Náhlad hlasovácí místnosti"><i class="fa fa-eye"></i></a>
+              {% elif ballot.in_time_progress %}
                 Probíhá
+              {% elif ballot.in_time_finished %}
+                <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-list-ol"></i> Výsledek</a>
               {% endif %}
             </td>
           </tr>

@@ -6,3 +6,39 @@
     Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}
   </p>
 {%- endmacro %}
+
+{% macro ballot_panel_template(ballot, hr=True) -%}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ballot.name}}</h3>
+    </div>
+    <div class="panel-body">
+      <p class="pre">{{ballot.description}}</p>
+      {{ ballot_details(ballot) }}
+    {% if hr %}
+    </div>
+    <hr/>
+    <div class="panel-body">  
+    {% endif %}
+      {{caller()}}
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro ballot_panel(ballot) -%}
+  {% call ballot_panel_template(ballot, False) %}
+    <p>
+      {% if ballot.cancelled %}
+        Zrušeno.
+      {% elif ballot.is_finished %}
+        Ukončeno. <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-default"><i class="fa fa-list-ol"></i> Zobrazit výsledek</a>
+      {% elif not ballot.in_progress %}
+        Nyní neprobíhá.
+      {% elif g.user.already_voted(ballot) %}
+        Již jste hlasoval/a.
+      {% else %}
+        <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a>
+      {% endif %}
+    </p>
+  {% endcall %}
+{%- endmacro %}

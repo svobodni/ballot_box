@@ -2,3 +2,8 @@
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+.panel>hr {
+    margin-top: 0;
+    margin-bottom: 0;
+}

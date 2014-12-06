@@ -1,2 +1,5 @@
-- [ ] Preview voting booth
-- [ ] Better handling of aborts
+- [x] Preview voting booth
+- [x] Better handling of aborts
+- [ ] Operations log
+- [ ] Protocols
+- [ ] Rich text ballot description

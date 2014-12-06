@@ -11,29 +11,29 @@
   <link rel="stylesheet" type="text/css" href="//web.svobodni.cz/cache/cssloader-d41d8cd98f00.css?0" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
   <script type="text/javascript" src="//web.svobodni.cz/cache/jsloader-d41d8cd98f00.js?0"></script>
-  <script type="text/javascript" src="js/tinymce/tinymce.min.js"></script>
-  <script type="text/javascript" src="js/vs.js"></script>
   <title>Svobodní | Volební systém</title>
 </head>
 <body>
   <div class="container header-container">
     <div class="row">
-      <div class="col-md-6 col-wb">
+      <div class="col-md-4 col-wb">
         <div class="header-logo"><a href="/"></a></div>
       </div>
-      <div class="col-md-6 col-wb">
-        {% if g.user %}
-          Přihlášen {{g.user.name}}
-        {% endif %}
+      <div class="col-md-8 col-wb">
+        <p class="text-right">
+          {% if g.user %}
+            Přihlášen {{g.user.name}}            
+          {% endif %}
+        </p>
       </div>
     </div>
   </div>
   <div class="container">
     <div class="row">
       <div class="col-md-3"><a class="section" href="{{ url_for('polling_station') }}">Volební místnost</a></div>
-      <div class="col-md-3"><a class="section" href="{{ url_for('ballot_list') }}">Seznam voleb</a></div>
-      <div class="col-md-3"><a class="section" href="#">Hlasování</a></div>
-      <div class="col-md-3"><a class="section" href="#">Nastavení</a></div>
+      {% if g.user and g.user.can_list_ballot() %}
+        <div class="col-md-3"><a class="section" href="{{ url_for('ballot_list') }}"><i class="fa fa-lock"></i> Seznam voleb</a></div>
+      {% endif %}
     </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
