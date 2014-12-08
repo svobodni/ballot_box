@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from ballot_box import app, db
-from models import Connection, User, Ballot, BallotOption, Vote, Voter
-from forms import BallotForm, BallotEditForm
-from registry import registry_request, registry_units
+from models import (Connection, User, Ballot, BallotOption, Vote, Voter,
+                    BallotProtocol)
+from forms import BallotForm, BallotEditForm, BallotProtocolForm, BallotProtocolEditForm
+from registry import registry_request
 from flask import (render_template, g, request, redirect, url_for, session,
                    abort, flash)
 from wtforms.validators import ValidationError
@@ -192,6 +193,7 @@ def ballot_options(ballot_id):
         return redirect(url_for("ballot_list"))
     return render_template('ballot_options.html', ballot=ballot)
 
+
 @app.route("/ballot/<int:ballot_id>/preview/", methods=('GET', 'POST'))
 @login_required
 def ballot_preview(ballot_id):
@@ -203,6 +205,80 @@ def ballot_preview(ballot_id):
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html', ballot=ballot)
     return render_template('polling_station_mark_regular.html', ballot=ballot)
+
+
+@app.route("/ballot/<int:ballot_id>/protocol/")
+@login_required
+def ballot_protocol_list(ballot_id):
+    if not g.user.can_edit_ballot():
+        abort(403)
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    return render_template('ballot_protocol_list.html', ballot=ballot)
+
+
+@app.route("/ballot/<int:ballot_id>/protocol/new/", methods=('GET', 'POST'))
+@login_required
+def ballot_protocol_new(ballot_id):
+    if not g.user.can_edit_ballot():
+        abort(403)
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    today = datetime.date.today()
+    name = g.user.name
+    form = BallotProtocolForm()
+    result = ballot_result(ballot)
+    if form.validate_on_submit():
+        protocol = BallotProtocol()
+        protocol.ballot_id = ballot.id
+        form.populate_obj(protocol)
+        db.session.add(protocol)
+        db.session.commit()
+        flash(u"Protokol úspěšně uložen.", "success")
+        return redirect(url_for("ballot_protocol_list", ballot_id=ballot_id))
+    print(render_template('protocol_template.html',
+                           ballot=ballot,
+                           name=name,
+                           date=today,
+                           result=result))
+    form.body_html.data = render_template('protocol_template.html',
+                           ballot=ballot,
+                           name=name,
+                           date=today,
+                           result=result)
+    return render_template('ballot_protocol_new.html', form=form)
+
+
+@app.route("/protocol/<int:protocol_id>/edit", methods=('GET', 'POST'))
+@login_required
+def ballot_protocol_edit(protocol_id):
+    if not g.user.can_edit_ballot():
+        abort(403)
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+    if protocol is None:
+        abort(404)
+    form = BallotProtocolEditForm(request.form, protocol)
+    if form.validate_on_submit():
+        form.populate_obj(protocol)
+        db.session.add(protocol)
+        db.session.commit()
+        flash(u"Protokol úspěšně uložen.", "success")
+        return redirect(url_for("ballot_protocol_list", ballot_id=protocol.ballot_id))
+    return render_template('protocol_edit.html', form=form)
+
+
+@app.route("/protocol/<int:protocol_id>/")
+@app.route("/protokol/<int:protocol_id>/")
+@login_required
+def protocol_item(protocol_id):
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+    if protocol is None:
+        abort(404)
+    if not g.user.can_edit_ballot() and not protocol.approved:
+        raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
+    return render_template('protocol_item.html', protocol=protocol)
 
 
 @app.route("/polling_station/")
@@ -367,20 +443,7 @@ def polling_station_vote(ballot_id):
                            ballot=ballot, hash_digest=hash_digest)
 
 
-@app.route("/polling_station/<int:ballot_id>/result/")
-@app.route("/volebni_mistnost/<int:ballot_id>/vysledek/")
-@login_required
-def polling_station_result(ballot_id):
-    ballot = db.session.query(Ballot).get(ballot_id)
-    if ballot is None:
-        abort(404)
-    if ballot.cancelled:
-        raise BallotBoxError(u"Tato volba byla zrušena.", 404)
-    if not ballot.is_finished:
-        raise BallotBoxError(u"Tato volba ještě probíhá.", 404)
-    if not ballot.approved:
-        raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 404)
-
+def ballot_result(ballot):
     result = []
     for db_option in ballot.options:
         option = {
@@ -413,5 +476,24 @@ def polling_station_result(ballot_id):
             current_votes = result[i]["order_by"]
             current_place.append(result[i])
             places_left -= 1
+
+    return result
+
+
+@app.route("/polling_station/<int:ballot_id>/result/")
+@app.route("/volebni_mistnost/<int:ballot_id>/vysledek/")
+@login_required
+def polling_station_result(ballot_id):
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if ballot.cancelled:
+        raise BallotBoxError(u"Tato volba byla zrušena.", 404)
+    if not ballot.is_finished:
+        raise BallotBoxError(u"Tato volba ještě probíhá.", 404)
+    if not ballot.approved:
+        raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 404)
+
+    result = ballot_result(ballot)
 
     return render_template('polling_station_result.html', ballot=ballot, result=result)

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Seznam protokolů {{ballot.name}}</h3>
+    <p><a href="{{url_for('ballot_protocol_new', ballot_id=ballot.id)}}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nový protokol</a></p>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Vytvořeno</th><th>Schváleno</th><th>Akce</th></tr>
+      </thead>
+      <tbody>
+        {% for protocol in ballot.protocols %}
+          <tr>
+            <td><a href="{{url_for('protocol_item', protocol_id=protocol.id)}}">{{protocol.created_at}}</a></td>
+            <td>
+              {% if protocol.approved %}
+                <span class="label label-success">Schváleno</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{url_for('ballot_protocol_edit', protocol_id=protocol.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

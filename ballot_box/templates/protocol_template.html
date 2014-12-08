@@ -1,0 +1,48 @@
+<p>Strana svobodných občanů</p>
+<p>Volební komise</p>
+<h1>Protokol o elektornické volbě</h1>
+<p>{{name}}, {{date}}</p>
+<dl class="dl-horizontal">
+  <dt>Název</dt>
+  <dd>{{ballot.name}}</dd>
+  <dt>Vyhlásil</dt>
+  <dd>DOPLNIT</dd>
+  <dt>Druh volby</dt>
+  <dd>{{ballot.type}}, {{ballot.method}}</dd>
+  <dt>Volených míst</dt>
+  <dd>{{ballot.max_votes}}</dd>
+  <dt>Voliči</dt>
+  <dd>{{ballot.unit}} {% if ballot.supporters_too %}členové i příznivci{% else %}členové{% endif %}</dd>
+  <dt>Termín</dt>
+  <dd>{{ballot.begin_at}} až {{ballot.finish_at}}</dd>
+</dl>
+<h2>Výsledek volby</h2>
+<dl class="dl-horizontal">
+  <dt>Zúčastněných</dt>
+  <dd>{{ballot.voters.count()}}</dd>
+</dl>
+{%- if ballot.is_yes_no %}
+{%- else %}
+  <table class="table">
+    <thead>
+      <tr><th>Kandidát</th><th>Hlasy</th></tr>
+    </thead>
+    <tbody>
+      {%- for option in result %}
+        <tr>
+          <td>{% if option["elected"] %}<strong>{% endif %}{{option["title"]}}{% if option["elected"] %}</strong>{% endif %}</td>
+          <td>{{option["votes"][1]|length}}</td>
+        </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+{%- endif %}
+<h2>Závěr</h2>
+<p>Během voleb ani 12&nbsp;hodin po&nbsp;jejich ukončení se na&nbsp;volební komisi neobrátil nikdo, kdo by zpochybnil správnost průběhu voleb a&nbsp;důvěryhodnost jejich výsledku.
+<p>Volby proběhly řádně a&nbsp;nebyly shledány žádné okolnosti, které by zpochybnily jejich průběh a&nbsp;důvěryhodnost.</p>
+<p>
+  Byli zvoleni
+  {%- for option in result %}
+    {%- if option["elected"] %}<strong>{{option["title"]}}</strong>, {% endif %}
+  {%- endfor %}.
+</p>

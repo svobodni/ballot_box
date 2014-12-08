@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block body %}
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <h3>Upravit protokol</h3>
+    {{ wtf.quick_form(form, button_map={"submit":"primary"}) }}
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from wtforms import SubmitField, SelectField
-from models import Ballot
+from models import Ballot, BallotProtocol
 from wtforms_components import DateRange
 from flask.ext.wtf import Form
 from wtforms_alchemy import model_form_factory
@@ -93,3 +93,17 @@ class BallotEditForm(ModelForm):
             }
         }
 BallotEditForm.submit = SubmitField(u'Uložit')
+
+
+class BallotProtocolForm(ModelForm):
+    class Meta:
+        model = BallotProtocol
+        only = ["body_html"]
+BallotProtocolForm.submit = SubmitField(u'Uložit')
+
+
+class BallotProtocolEditForm(ModelForm):
+    class Meta:
+        model = BallotProtocol
+        only = ["body_html", "approved"]
+BallotProtocolEditForm.submit = SubmitField(u'Uložit')

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+{% if not protocol.approved %}
+    <div class="alert alert-danger" role="alert">Protokol ještě nebyl schválen!</div>
+{% endif %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    {{protocol.body_html|safe}}
+  </div>
+</div>
+{% endblock %}
