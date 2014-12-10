@@ -1,19 +1,57 @@
 {% extends "base.html" %}
 {% block body %}
+<script type="text/javascript" src="{{ url_for('static', filename='typeahead.bundle.min.js')}}"></script>
+<script type="text/javascript">
+  var users = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    limit: 10,
+    prefetch: {
+      url: BASE_URL+'registry/people.json',
+      filter: function(json) {
+        return $.map(json["people"], function(person) { return { name: person["name"], id: person["id"]}; });
+      }
+    }
+  }); 
+  $(document).ready(function() {
+    users.initialize();
+    $('.bo').typeahead(null, {
+      name: 'users',
+      displayKey: 'name',
+      source: users.ttAdapter()
+    }).bind('typeahead:selected', function(obj, selected, name) {
+      $('.bo-userid[name=bo-userid-'+$(this).data('i')+']').val(selected['id']);
+    });
+  });
+</script>
 <div class="row">
-  <div class="col-md-8 col-md-offset-2">
+  <div class="col-md-12">
     <h3>Upravit možnosti nebo kandidáty</h3>
     <form method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <ul>
         {% for option in ballot.options %}
           <li>
-            <input class="form-control" type="text" maxlength="80" value="{{option.title}}" name="bo"/>
+            <div class="row">
+              <div class="col-md-8">
+                <input class="form-control bo" type="text" maxlength="80" value="{{option.title}}" name="bo-{{loop.index-1}}" data-i="{{loop.index-1}}"/>
+              </div>
+              <div class="col-md-4">
+                <input class="form-control bo-userid" type="text" maxlength="80" value="{{option.user_id or ''}}" name="bo-userid-{{loop.index-1}}" data-i="{{loop.index}}" placeholder="user ID kandidáta"/>
+              </div>
+            </div>
           </li>
         {% endfor %}
-        {% for i in range(5) %}
+        {% for i in range(ballot.options|length,ballot.options|length+5) %}
           <li>
-            <input class="form-control bo-new" type="text" maxlength="80" value="" name="bo" placeholder="Nová možnost"/>
+            <div class="row">
+              <div class="col-md-8">
+                <input class="form-control bo" type="text" maxlength="80" value="" name="bo-{{i}}" data-i="{{i}}" placeholder="Nová možnost"/>
+              </div>
+              <div class="col-md-4">
+                <input class="form-control bo-userid" type="text" maxlength="80" value="" name="bo-userid-{{i}}" data-i="{{i}}" placeholder="user ID kandidáta"/>
+              </div>
+            </div>
           </li>
         {% endfor %}
       </ul>

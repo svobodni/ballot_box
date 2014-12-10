@@ -1,4 +1,4 @@
-{% from '_macros.html' import ballot_panel_template %}
+{% from '_macros.html' import ballot_panel_template, ballot_option_details %}
 {% extends "base.html" %}
 {% block body %}
 <div class="row">
@@ -10,6 +10,7 @@
         {% for option in ballot.options %}
           <div  class="form-group">
           <label>{{option.title}}</label>
+          {{ballot_option_details(option)}}
           <div class="radio">
             <label>
               <input type="radio" class="ballot-option" name="option,{{option.id}}" value="1">

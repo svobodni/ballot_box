@@ -45,3 +45,7 @@
     </p>
   {% endcall %}
 {%- endmacro %}
+
+{% macro ballot_option_details(option) -%}
+  {{option.title}} {{option.user_id or ""}}
+{%- endmacro %}

@@ -1,4 +1,4 @@
-{% from '_macros.html' import ballot_panel_template %}
+{% from '_macros.html' import ballot_panel_template, ballot_option_details %}
 {% extends "base.html" %}
 {% block body %}
 <script type="text/javascript">
@@ -44,6 +44,7 @@
             <label>
               <input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">
               {{option.title}}
+              {{ballot_option_details(option)}}
             </label>
           </div>
         {% endfor %}

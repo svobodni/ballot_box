@@ -81,6 +81,18 @@ def handle_ballot_box_error(error):
             error.status_code)
 
 
+@app.route("/registry/people.json")
+@login_required
+def registry_people():
+    return registry_request("/people.json").text
+
+
+@app.route("/registry/people/<int:user_id>.json")
+@login_required
+def registry_person(user_id):
+    return registry_request("/people/{}.json".format(user_id)).text
+
+
 @app.route("/")
 @login_required
 def index():
@@ -173,17 +185,31 @@ def ballot_options(ballot_id):
         added = 0
         removed = 0
         unchanged = 0
-        bos = set(request.values.getlist('bo')) - set([u""])
+        bos = set()
+        for key in request.values.keys():
+            try:
+                name, index = key.rsplit('-')
+                if name == "bo":
+                    bos.add((request.values.get(key), request.values.get("bo-userid-"+index, "")))
+            except:
+                pass
+        bos = bos - set([(u"", u"")])
+        print(bos)
         for db_option in ballot.options:
-            if db_option.title not in bos:
+            bo = (db_option.title, unicode(db_option.user_id or ""))
+            if bo not in bos:
                 db.session.delete(db_option)
                 removed += 1
             else:
-                bos.discard(db_option.title)
+                bos.discard(bo)
                 unchanged += 1
-        for option in bos:
+        for (title, user_id) in bos:
             db_option = BallotOption()
-            db_option.title = option
+            db_option.title = title
+            try:
+                db_option.user_id = int(user_id)
+            except:
+                db_option.user_id = None
             db_option.ballot = ballot
             db.session.add(db_option)
             added += 1

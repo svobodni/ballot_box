@@ -215,7 +215,7 @@ class BallotOption(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
     title = db.Column(db.Unicode(100))
-
+    user_id = db.Column(db.Integer, nullable=True)
     votes = db.relationship('Vote', backref='ballot_option',
                             lazy='dynamic', order_by="Vote.hash_digest")
 
