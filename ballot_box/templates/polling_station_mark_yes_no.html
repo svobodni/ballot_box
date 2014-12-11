@@ -8,27 +8,29 @@
       <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         {% for option in ballot.options %}
-          <div  class="form-group">
-          <label>{{option.title}}</label>
-          {{ballot_option_details(option)}}
-          <div class="radio">
-            <label>
-              <input type="radio" class="ballot-option" name="option,{{option.id}}" value="1">
-              PRO NÁVRH
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input type="radio" class="ballot-option" name="option,{{option.id}}" value="-1">
-              PROTI NÁVRHU
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input type="radio" class="ballot-option" name="option,{{option.id}}" value="" checked>
-              nehlasovat
-            </label>
-          </div>
+          <div  class="form-group panel panel-default">
+            <div class="panel-body">
+              <label>{{option.title}}</label>
+              {{ballot_option_details(option)}}
+              <div class="radio">
+                <label>
+                  <input type="radio" class="ballot-option" name="option,{{option.id}}" value="1">
+                  PRO NÁVRH
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" class="ballot-option" name="option,{{option.id}}" value="-1">
+                  PROTI NÁVRHU
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" class="ballot-option" name="option,{{option.id}}" value="" checked>
+                  nehlasovat
+                </label>
+              </div>
+            </div>
           </div>
         {% endfor %}
         <p class="text-muted" id="remaining-votes-count"></p>

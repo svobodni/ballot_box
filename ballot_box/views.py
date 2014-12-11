@@ -15,6 +15,8 @@ import datetime
 from os import urandom
 from base64 import b64encode
 import hashlib
+from babel.dates import format_datetime
+import bleach
 
 
 class BallotBoxError(Exception):
@@ -64,6 +66,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+@app.template_filter('fmt_dt')
+def fmt_dt_filter(dt):
+    return format_datetime(dt, format='EEEE d.M.yyyy hh:mm', locale='cs_CZ')
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -144,6 +150,7 @@ def ballot_new():
     if form.validate_on_submit():
         ballot = Ballot()
         form.populate_obj(ballot)
+        ballot.description = bleach.clean(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně přidáno.", "success")
@@ -164,6 +171,7 @@ def ballot_edit(ballot_id):
     form = BallotEditForm(request.form, ballot)
     if form.validate_on_submit():
         form.populate_obj(ballot)
+        ballot.description = bleach.clean(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně změněno.", "success")

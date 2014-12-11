@@ -1,7 +1,7 @@
 {% macro ballot_details(ballot) -%}
   <p>
     Typ: {{ballot.type}} &nbsp;&nbsp; Vyhodnocení: {{ballot.method}}<br/>
-    Termín: {{ballot.begin_at}} až {{ballot.finish_at}}<br/>
+    Termín: {{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}}<br/>
     Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
     Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}
   </p>
@@ -13,7 +13,7 @@
       <h3 class="panel-title">{{ballot.name}}</h3>
     </div>
     <div class="panel-body">
-      <p class="pre">{{ballot.description}}</p>
+      <p>{{ballot.description|safe}}</p>
       {{ ballot_details(ballot) }}
     {% if hr %}
     </div>
@@ -47,5 +47,9 @@
 {%- endmacro %}
 
 {% macro ballot_option_details(option) -%}
-  {{option.title}} {{option.user_id or ""}}
+  {% if option.user_id %}
+    <div class="bo-profile clearfix" data-userid="{{option.user_id or ""}}"></div>
+  {% else %}
+    <div class="bo-profile-empty"></div>
+  {% endif %}
 {%- endmacro %}

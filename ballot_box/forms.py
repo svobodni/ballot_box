@@ -67,6 +67,9 @@ class BallotForm(ModelForm):
                 "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
                 "default": lambda: midnight(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
+            },
+            "description": {
+                "description": u"HTML",
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
@@ -90,6 +93,9 @@ class BallotEditForm(ModelForm):
                 "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
                 "default": lambda: midnight(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
+            },
+            "description": {
+                "description": u"HTML",
             }
         }
 BallotEditForm.submit = SubmitField(u'Uložit')

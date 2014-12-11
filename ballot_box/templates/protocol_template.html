@@ -14,7 +14,7 @@
   <dt>Voliči</dt>
   <dd>{{ballot.unit}} {% if ballot.supporters_too %}členové i příznivci{% else %}členové{% endif %}</dd>
   <dt>Termín</dt>
-  <dd>{{ballot.begin_at}} až {{ballot.finish_at}}</dd>
+  <dd>{{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}}</dd>
 </dl>
 <h2>Výsledek volby</h2>
 <dl class="dl-horizontal">

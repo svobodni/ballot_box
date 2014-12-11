@@ -14,7 +14,7 @@
         {% for ballot in ballots %}
           <tr>
             <td>{{ballot.name}}</td>
-            <td class="pre">{{ballot.description}}</td>
+            <td class="pre">{{ballot.description|safe}}</td>
             <td>
               {{ballot.type}}
               {% if ballot.is_yes_no %}

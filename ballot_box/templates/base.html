@@ -12,8 +12,9 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
   <script type="text/javascript" src="//web.svobodni.cz/cache/jsloader-d41d8cd98f00.js?0"></script>
   <script type="text/javascript">
-    BASE_URL = "{{ url_for('index')}}";
+    BASE_URL = "{{ url_for('index', _external=True)}}";
   </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='ballot_box.js')}}"></script>
   <title>Svobodní | Volební systém</title>
 </head>
 <body>

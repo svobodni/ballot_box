@@ -40,12 +40,16 @@
       <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         {% for option in ballot.options %}
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">
-              {{option.title}}
-              {{ballot_option_details(option)}}
-            </label>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">
+                  {{option.title}}
+                </label>
+                {{ballot_option_details(option)}}
+              </div>
+            </div>
           </div>
         {% endfor %}
         <p class="text-muted" id="remaining-votes-count"></p>

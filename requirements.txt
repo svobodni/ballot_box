@@ -5,3 +5,5 @@ Flask-WTF
 requests
 Flask-Bootstrap
 WTForms-Alchemy
+Babel
+bleach
