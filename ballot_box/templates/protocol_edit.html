@@ -1,6 +1,8 @@
+{% from '_macros.html' import  tinymce %}
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% block body %}
+{{ tinymce(extended=True) }}
 <div class="row">
   <div class="col-md-8 col-md-offset-2">
     <h3>Upravit protokol</h3>

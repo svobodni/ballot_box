@@ -19,6 +19,14 @@ from babel.dates import format_datetime
 import bleach
 
 
+def sanitize_html(html, extended=False):
+    allowed_tags = bleach.ALLOWED_TAGS + ['p']
+    if extended:
+        allowed_tags += ['p', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                         'dd', 'dt', 'dl', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    return bleach.clean(html, tags=allowed_tags)
+
+
 class BallotBoxError(Exception):
     status_code = 400
 
@@ -150,7 +158,7 @@ def ballot_new():
     if form.validate_on_submit():
         ballot = Ballot()
         form.populate_obj(ballot)
-        ballot.description = bleach.clean(ballot.description)
+        ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně přidáno.", "success")
@@ -171,7 +179,7 @@ def ballot_edit(ballot_id):
     form = BallotEditForm(request.form, ballot)
     if form.validate_on_submit():
         form.populate_obj(ballot)
-        ballot.description = bleach.clean(ballot.description)
+        ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně změněno.", "success")
@@ -202,7 +210,6 @@ def ballot_options(ballot_id):
             except:
                 pass
         bos = bos - set([(u"", u"")])
-        print(bos)
         for db_option in ballot.options:
             bo = (db_option.title, unicode(db_option.user_id or ""))
             if bo not in bos:
@@ -268,15 +275,11 @@ def ballot_protocol_new(ballot_id):
         protocol = BallotProtocol()
         protocol.ballot_id = ballot.id
         form.populate_obj(protocol)
+        protocol.body_html = sanitize_html(protocol.body_html, extended=True)
         db.session.add(protocol)
         db.session.commit()
         flash(u"Protokol úspěšně uložen.", "success")
         return redirect(url_for("ballot_protocol_list", ballot_id=ballot_id))
-    print(render_template('protocol_template.html',
-                           ballot=ballot,
-                           name=name,
-                           date=today,
-                           result=result))
     form.body_html.data = render_template('protocol_template.html',
                            ballot=ballot,
                            name=name,
@@ -296,6 +299,7 @@ def ballot_protocol_edit(protocol_id):
     form = BallotProtocolEditForm(request.form, protocol)
     if form.validate_on_submit():
         form.populate_obj(protocol)
+        protocol.body_html = sanitize_html(protocol.body_html, extended=True)
         db.session.add(protocol)
         db.session.commit()
         flash(u"Protokol úspěšně uložen.", "success")
@@ -438,7 +442,6 @@ def polling_station_vote(ballot_id):
     permit_voting(ballot)
 
     input_options = pickle.loads(request.form["input_options_data"])
-    print(input_options)
     try:
         validate_options(input_options, ballot)
     except ValidationError as e:

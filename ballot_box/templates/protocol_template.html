@@ -22,6 +22,20 @@
   <dd>{{ballot.voters.count()}}</dd>
 </dl>
 {%- if ballot.is_yes_no %}
+  <table class="table">
+    <thead>
+      <tr><th>Kandidát</th><th>PRO NÁVRH</th><th>PROTI NÁVRHU</th></tr>
+    </thead>
+    <tbody>
+      {%- for option in result %}
+        <tr>
+          <td>{% if option["elected"] %}<strong>{% endif %}{{option["title"]}}{% if option["elected"] %}</strong>{% endif %}</td>
+          <td>{{option["votes"][1]|length}}</td>
+          <td>{{option["votes"][-1]|length}}</td>
+        </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
 {%- else %}
   <table class="table">
     <thead>
@@ -41,7 +55,7 @@
 <p>Během voleb ani 12&nbsp;hodin po&nbsp;jejich ukončení se na&nbsp;volební komisi neobrátil nikdo, kdo by zpochybnil správnost průběhu voleb a&nbsp;důvěryhodnost jejich výsledku.
 <p>Volby proběhly řádně a&nbsp;nebyly shledány žádné okolnosti, které by zpochybnily jejich průběh a&nbsp;důvěryhodnost.</p>
 <p>
-  Byli zvoleni
+  Byli zvoleni 
   {%- for option in result %}
     {%- if option["elected"] %}<strong>{{option["title"]}}</strong>, {% endif %}
   {%- endfor %}.
