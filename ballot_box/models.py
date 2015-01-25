@@ -61,7 +61,7 @@ class User(object):
         return self.can_create_ballot()
 
     def can_edit_ballot(self):
-        return self.can_create_ballot()
+        return self.is_election_commission_member
 
     def can_edit_ballot_options(self):
         return self.can_edit_ballot()
