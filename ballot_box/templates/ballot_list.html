@@ -45,14 +45,20 @@
             </td>
             <td>
               {% if not ballot.in_time_progress and not ballot.in_time_finished %}
-                <a href="{{url_for('ballot_edit', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
-                <a href="{{url_for('ballot_options', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Možnosti/kandidáti"><i class="fa fa-users"></i></a>
-                <a href="{{url_for('ballot_preview', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Náhled hlasovácí místnosti"><i class="fa fa-eye"></i></a>
+                {% if g.user.can_edit_ballot %}
+                  <a href="{{url_for('ballot_edit', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
+                {% endif %}
+                {% if g.user.can_edit_ballot_options %}
+                  <a href="{{url_for('ballot_options', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Možnosti/kandidáti"><i class="fa fa-users"></i></a>
+                  <a href="{{url_for('ballot_preview', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Náhled hlasovácí místnosti"><i class="fa fa-eye"></i></a>
+                {% endif %}
               {% elif ballot.in_time_progress %}
                 Probíhá
               {% elif ballot.in_time_finished %}
                 <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-list-ol"></i> Výsledek</a>
-                <a href="{{url_for('ballot_protocol_list', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-file-text-o"></i> Protokol</a>
+                {% if g.user.can_edit_ballot %}
+                  <a href="{{url_for('ballot_protocol_list', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-file-text-o"></i> Protokol</a>
+                {% endif %}  
               {% endif %}
             </td>
           </tr>
