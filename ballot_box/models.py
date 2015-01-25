@@ -78,14 +78,8 @@ class User(object):
                 pass
         elif unit_type == "region":
             try:
-                # TODO: is this really correct?
-                if "guest_region" in self.profile["person"]:
-                    region = self.profile["person"]["guest_region"]
-                else:
-                    region = self.profile["person"]["domestic_region"]
-
-                if region["id"] == unit_id:
-                        return True
+                if self.profile["person"]["domestic_region"]["id"] == unit_id:
+                    return True
             except KeyError:
                 pass
 
