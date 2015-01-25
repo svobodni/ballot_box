@@ -97,6 +97,9 @@ class User(object):
     def can_vote(self, ballot):
         return self.has_right_to_vote(ballot) and not self.already_voted(ballot)
 
+    def can_candidate_signup(self, ballot):
+        return self.has_right_to_vote(ballot)
+
     @property
     def votable_unit_codes(self):
         # TODO: make more efficient
@@ -166,6 +169,7 @@ class Ballot(db.Model):
     voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
     protocols = db.relationship('BallotProtocol', backref='ballot',
                                 lazy='dynamic', order_by="desc(BallotProtocol.created_at)")
+    candidate_self_signup = db.Column(db.Boolean, nullable=False, default=True, info={'label': u'Kandidáti se přihlašují sami'})
 
     @property
     def in_time_progress(self):

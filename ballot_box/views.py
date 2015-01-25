@@ -534,3 +534,59 @@ def polling_station_result(ballot_id):
     result = ballot_result(ballot)
 
     return render_template('polling_station_result.html', ballot=ballot, result=result)
+
+
+@app.route("/candidate_signup/")
+@app.route("/podani_kandidatury/")
+@login_required
+def candidate_signup():
+    ballots = (db.session.query(Ballot)
+               .filter(Ballot.approved == True)
+               .filter(Ballot.candidate_self_signup == True)
+               .filter(Ballot.cancelled == False)
+               .filter(Ballot.type == "ELECTION")
+               .filter(Ballot.begin_at > datetime.datetime.now())
+               .order_by(Ballot.id.desc()))
+    ballots = filter(g.user.can_candidate_signup, ballots)
+    return render_template('candidate_signup.html', ballots=ballots)
+
+
+@app.route("/candidate_signup/<int:ballot_id>/", methods=("GET", "POST"))
+@app.route("/podani_kandidatury/<int:ballot_id>/", methods=("GET", "POST"))
+@login_required
+def candidate_signup_confirm(ballot_id):
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if ballot.type != "ELECTION":
+        raise BallotBoxError(u"V hlasování není možno kandidovat.", 403)
+    if not g.user.can_candidate_signup(ballot):
+        raise BallotBoxError(u"V této volbě nemáte právo kandidovat.", 403)
+    if not ballot.candidate_self_signup:
+        raise BallotBoxError(u"V této volbě není povoleno přímé podání kandidatury. "
+                             u"Kontaktujte prosím vyhlašovatele volby nebo volební komisi.", 403)
+    if ballot.cancelled:
+        raise BallotBoxError(u"Tato volba byla zrušena.", 403)
+    if ballot.begin_at < datetime.datetime.now():
+        raise BallotBoxError(u"Tato volba již probíhá.", 403)
+    if not ballot.approved:
+        raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 403)
+
+    if request.method == "POST":
+        user_id = g.user.id
+        db_option = (db.session.query(BallotOption)
+                     .filter(BallotOption.ballot_id == ballot.id)
+                     .filter(BallotOption.user_id == user_id)
+                     .first())
+        if db_option:
+            flash(u"V této volbě již kandidujete.", "danger")
+        else:
+            db_option = BallotOption()
+            db_option.title = g.user.name
+            db_option.user_id = int(user_id)
+            db_option.ballot = ballot
+            db.session.add(db_option)
+            db.session.commit()
+            flash(u"Kandidatura úspěšně podána.", "success")
+            return redirect(url_for('candidate_signup'))
+    return render_template('candidate_signup_confirm.html', ballot=ballot)

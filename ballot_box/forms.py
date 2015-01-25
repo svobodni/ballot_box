@@ -53,7 +53,8 @@ class BallotForm(ModelForm):
     class Meta:
         model = Ballot
         only = ["type", "name", "description", "unit",
-                "supporters_too", "max_votes", "begin_at", "finish_at"]
+                "supporters_too", "max_votes", "begin_at", "finish_at",
+                "candidate_self_signup"]
         field_args = {
             "name": {
                 "validators": [validators.Length(min=10)],
@@ -80,6 +81,7 @@ class BallotEditForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
+                "candidate_self_signup",
                 "approved", "cancelled"]
         field_args = {
             "name": {

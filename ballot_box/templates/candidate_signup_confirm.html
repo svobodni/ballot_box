@@ -1,0 +1,23 @@
+{% from '_macros.html' import ballot_panel_template %}
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Potvrzení podání kandidatury</h3>
+    {% call ballot_panel_template(ballot, False) %}
+      <dl class="dl-horizontal">
+        <dt>Jméno</dt>
+        <dd>{{g.user.name}}</dd>
+        <dt>ID</dt>
+        <dd>{{g.user.id}}</dd>
+      </dl>
+      <p>
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-primary pull-right">Potvrdit podání kandidatury</button>
+        </form>
+      </p>
+    {% endcall %}
+  </div>
+</div>
+{% endblock %}

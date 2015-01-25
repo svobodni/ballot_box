@@ -1,0 +1,29 @@
+{% from '_macros.html' import ballot_panel_template, ballot_option_details %}
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Podání kandidatury</h3>
+    {% for ballot in ballots %}
+      {% call ballot_panel_template(ballot, False) %}
+        {% if ballot.options %}
+          Přihlášení kandidáti:
+        {% else %}
+          Kandidaturu zatím nikdo nepodal.
+        {% endif %}
+        {% for option in ballot.options %}
+          <div class="panel panel-default">
+            <div class="panel-body">
+                {{option.title}}
+                {{ballot_option_details(option)}}
+            </div>
+          </div>
+        {% endfor %}
+        <p><a href="{{url_for('candidate_signup_confirm', ballot_id=ballot.id)}}" class="btn btn-primary">Podat kandidaturu...</a></p>
+      {% endcall %}
+    {% else %}
+      Nyní nemůžete podat kandidaturu k žádné volbě.
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
