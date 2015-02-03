@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from ballot_box import app, db
+from ballot_box import app, db, BallotBoxError
 from models import (Connection, User, Ballot, BallotOption, Vote, Voter,
                     BallotProtocol)
 from forms import BallotForm, BallotEditForm, BallotProtocolForm, BallotProtocolEditForm
-from registry import registry_request
+from registry import registry_request, send_vote_confirmation
 from flask import (render_template, g, request, redirect, url_for, session,
                    abort, flash)
 from wtforms.validators import ValidationError
@@ -25,22 +25,6 @@ def sanitize_html(html, extended=False):
         allowed_tags += ['p', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
                          'dd', 'dt', 'dl', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
     return bleach.clean(html, tags=allowed_tags)
-
-
-class BallotBoxError(Exception):
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
 
 
 def force_auth():
@@ -77,7 +61,8 @@ def login_required(f):
 
 @app.template_filter('fmt_dt')
 def fmt_dt_filter(dt):
-    return format_datetime(dt, format='EEEE d.M.yyyy hh:mm', locale='cs_CZ')
+    return format_datetime(dt, format='EEEE d.M.yyyy HH:mm', locale='cs_CZ')
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -473,6 +458,8 @@ def polling_station_vote(ballot_id):
     voter.remote_addr = request.remote_addr
     voter.user_agent = request.user_agent.string
     db.session.add(voter)
+
+    send_vote_confirmation(ballot, voter, hash_digest)
 
     db.session.commit()
 

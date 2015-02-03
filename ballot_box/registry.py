@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
+import json
 import requests
-from ballot_box import app
-from flask import g, request
+from ballot_box import app, BallotBoxError
+from flask import g, request, render_template
 
 
-def registry_request(resource, jwt=None):
+def get_jwt(jwt=None):
     if jwt is None:
         jwt = request.args.get("jwt", None)
         if jwt is None:
             jwt = g.user.jwt
+    if jwt is None:
+        raise BallotBoxError(u"Autorizační token nenalezen.")
+    return jwt
+
+
+def registry_request(resource, jwt=None):
+    jwt = get_jwt(jwt)
     headers = {"Authorization": "Bearer {}".format(jwt)}
     return requests.get(app.config["REGISTRY_URI"] + resource,
                         headers=headers)
@@ -34,3 +42,31 @@ def registry_units():
     except KeyError:
         pass
     return units
+
+
+def send_vote_confirmation(ballot, voter, hash_digest, jwt=None):
+    jwt = get_jwt(jwt)
+
+    body = render_template('confirmation_email.txt',
+                           ballot=ballot,
+                           voter=voter,
+                           hash_digest=hash_digest)
+
+    email_dict = {
+        "auth": jwt,
+        "from": {
+            "name": "Volební komise",
+            "email": "vk@svobodni.cz"
+        },
+        "subject": "Potvrzení hlasování",
+        "plain": body,
+        "files": [],
+        "recipients": [{
+            "email": g.user.email,
+        }]
+    }
+
+    r = requests.post("https://mailer.svobodni.cz/json/send",
+                      data=json.dumps(email_dict))
+    if r.status_code != requests.codes.ok:
+        raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")

@@ -1,0 +1,8 @@
+Děkujeme, že jste využil(a) svého hlasovacího práva! Toto je automatický email odeslaný jako potvrzení o uskutečnění volby prostřednictvím volebního rozhraní Svobodných. Volební systém nearchivuje kdo jak volil, ale zaznamenává hlasy pro jednotlivé kandidáty. Že byl Vás hlas správně započítán, si můžete ověřit pomocí anonymního kontrolního řetězce.
+
+Jméno voliče: {{voter.name}}
+Volba: {{ballot.name}}
+Okamžik volby: {{voter.voted_at|fmt_dt}}
+Kontrolní řetězec: {{hash_digest}}
+
+Po skončení volby si pomocí kontrolního řetězce můžete na stránce voleb {{url_for('polling_station_result', ballot_id=ballot.id, _external=True)}} ověřit, že váš hlas byl správně započítán.
