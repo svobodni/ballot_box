@@ -438,7 +438,7 @@ def polling_station_vote(ballot_id):
 
     hash_base = request.form["hash_base"]
     h = hashlib.sha1()
-    h.update(hash_base)
+    h.update(hash_base.encode("utf-8"))
     # h.update(urandom(30))
     hash_digest = h.hexdigest()
 
