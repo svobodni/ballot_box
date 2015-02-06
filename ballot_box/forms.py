@@ -45,7 +45,10 @@ class Difference(object):
             other = form[self.fieldname]
         except KeyError:
             raise validators.ValidationError(field.gettext("Invalid field name '%s'.") % self.fieldname)
-        if field.data - other.data <= self.difference:
+        try:
+            if field.data - other.data <= self.difference:
+                raise validators.ValidationError(self.message)
+        except TypeError:
             raise validators.ValidationError(self.message)
 
 
