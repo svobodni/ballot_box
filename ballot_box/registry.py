@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 import requests
-from ballot_box import app, BallotBoxError
+from ballot_box import app, BallotBoxError, mail
 from flask import g, request, render_template
+from flask.ext.mail import Message
 
 
 def get_jwt(jwt=None):
@@ -45,28 +46,34 @@ def registry_units():
 
 
 def send_vote_confirmation(ballot, voter, hash_digest, jwt=None):
-    jwt = get_jwt(jwt)
-
     body = render_template('confirmation_email.txt',
                            ballot=ballot,
                            voter=voter,
                            hash_digest=hash_digest)
 
-    email_dict = {
-        "auth": jwt,
-        "from": {
-            "name": "Volební komise",
-            "email": "vk@svobodni.cz"
-        },
-        "subject": "Potvrzení hlasování",
-        "plain": body,
-        "files": [],
-        "recipients": [{
-            "email": g.user.email,
-        }]
-    }
+    if app.config["USE_SMTP"]:
+        msg = Message("Potvrzení hlasování",
+                      sender=(u"Volební komise", "vk@svobodni.cz"),
+                      recipients=[g.user.email])
+        msg.body = body
+        mail.send(msg)
+    else:
+        jwt = get_jwt(jwt)
+        email_dict = {
+            "auth": jwt,
+            "from": {
+                "name": "Volební komise",
+                "email": "vk@svobodni.cz"
+            },
+            "subject": "Potvrzení hlasování",
+            "plain": body,
+            "files": [],
+            "recipients": [{
+                "email": g.user.email,
+            }]
+        }
 
-    r = requests.post("https://mailer.svobodni.cz/json/send",
-                      data=json.dumps(email_dict))
-    if r.status_code != requests.codes.ok:
-        raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")
+        r = requests.post("https://mailer.svobodni.cz/json/send",
+                          data=json.dumps(email_dict))
+        if r.status_code != requests.codes.ok:
+            raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")

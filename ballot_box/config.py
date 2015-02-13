@@ -8,10 +8,12 @@ class Config(object):
     REGISTRY_URI = "https://registr.svobodni.cz"
     SECRET_KEY = "not a secret"
     LOGIN_TIMEOUT = datetime.timedelta(minutes=30)
+    USE_SMTP = False
 
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = "mysql://user@localhost/foo"
+    USE_SMTP = True
 
 
 class DevelopmentConfig(Config):

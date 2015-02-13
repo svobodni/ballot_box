@@ -3,6 +3,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from werkzeug.contrib.cache import SimpleCache
 from flask_wtf.csrf import CsrfProtect
+from flask.ext.mail import Mail
 
 
 class BallotBoxError(Exception):
@@ -25,6 +26,7 @@ app = Flask(__name__)
 app.config.from_object('ballot_box.config.DevelopmentConfig')
 Bootstrap(app)
 CsrfProtect(app)
+mail = Mail(app)
 
 db = SQLAlchemy(app)
 
