@@ -18,7 +18,7 @@
       <ol>
         {% for option in result %}
           <li>
-            {% if option["elected"] %}<strong>{% endif %}{{option["title"]}}{% if option["elected"] %}</strong>{% endif %}
+            {% if option["elected"] %}<i class="fa fa-check"></i> <strong>{% endif %}{{option["title"]}}{% if option["elected"] %}</strong>{% endif %}
             {% if option["votes"][1]|length > 0 %}
               <small>PRO NÁVRH:</small> {{option["votes"][1]|length}}&nbsp;&nbsp;
             {% endif %}
