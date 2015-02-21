@@ -21,6 +21,9 @@ $(document).ready(function() {
                     } else if(t == "twitter") {
                         html += '<a href="https://twitter.com/'+v+'"><i class="fa fa-twitter fa-fw"></i> Twitter</a>';
                     } else if(t == "web") {
+                        if (!/^https?:\/\//i.test(v)) {
+                            v = 'http://' + v;
+                        }
                         html += '<a href="'+v+'"><i class="fa fa-globe fa-fw"></i> Web</a>';
                     } else if(t == "blog") {
                         html += '<a href="'+v+'"><i class="fa fa-book fa-fw"></i> Blog</a>';
