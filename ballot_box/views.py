@@ -489,9 +489,9 @@ def ballot_result(ballot):
             option["order_by"] = len(option["votes"][1])
         result = sorted(result, key=lambda x: -x["order_by"])
         places_left = ballot.max_votes
-        current_place = [result[0]]
-        current_votes = result[0]["order_by"]
-        for i in range(1, len(result)):
+        current_place = []
+        current_votes = 1 << 20
+        for i in range(len(result)):
             if result[i]["order_by"] < current_votes and places_left >= 0:
                 for r in current_place:
                     if r["order_by"] > 0:
