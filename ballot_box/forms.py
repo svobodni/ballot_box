@@ -24,8 +24,8 @@ class ModelForm(BaseModelForm):
         return db.session
 
 
-def morning(at=9):
-    return ((datetime.datetime.now() + datetime.timedelta(days=1))
+def morning(days=1, at=9):
+    return ((datetime.datetime.now() + datetime.timedelta(days=days))
             .replace(hour=at, minute=0, second=0))
 
 
@@ -35,10 +35,11 @@ def midnight(days=8):
 
 
 class Difference(object):
-    def __init__(self, fieldname, difference, message):
+    def __init__(self, fieldname, difference, message, reverse=False):
         self.fieldname = fieldname
         self.difference = difference
         self.message = message
+        self.reverse = reverse
 
     def __call__(self, form, field):
         try:
@@ -46,7 +47,9 @@ class Difference(object):
         except KeyError:
             raise validators.ValidationError(field.gettext("Invalid field name '%s'.") % self.fieldname)
         try:
-            if field.data - other.data <= self.difference:
+            if not self.reverse and field.data - other.data <= self.difference:
+                raise validators.ValidationError(self.message)
+            elif self.reverse and other.data - field.data <= self.difference:
                 raise validators.ValidationError(self.message)
         except TypeError:
             raise validators.ValidationError(self.message)
@@ -57,7 +60,7 @@ class BallotForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
-                "candidate_self_signup"]
+                "candidate_self_signup", "candidate_signup_until"]
         field_args = {
             "name": {
                 "validators": [validators.Length(min=10)],
@@ -65,7 +68,7 @@ class BallotForm(ModelForm):
             },
             "begin_at": {
                 "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(hours=1), message=u"Začátek musí být nejméně za hodinu.")],
-                "default": lambda: morning(),
+                "default": lambda: morning(days=2, at=9),
             },
             "finish_at": {
                 "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
@@ -74,6 +77,11 @@ class BallotForm(ModelForm):
             },
             "description": {
                 "description": u"HTML",
+            },
+            "candidate_signup_until": {
+                "validators": [validators.Optional(), Difference("begin_at", difference=datetime.timedelta(hours=-24), message=u"Konec přihlašování musí být nejméně 24 hodin před začátkém voleb.", reverse=True)],
+                "default": lambda: morning(days=1, at=8),
+                "description": u"Nejméně 24 hodin před začátkém voleb",
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
@@ -84,7 +92,7 @@ class BallotEditForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
-                "candidate_self_signup",
+                "candidate_self_signup", "candidate_signup_until",
                 "approved", "cancelled"]
         field_args = {
             "name": {
@@ -92,7 +100,7 @@ class BallotEditForm(ModelForm):
             },
             "begin_at": {
                 "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(minutes=5), message=u"Začátek musí být nejméně za 5 minut.")],
-                "default": lambda: morning(),
+                "default": lambda: morning(days=2, at=9),
             },
             "finish_at": {
                 "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
@@ -101,6 +109,10 @@ class BallotEditForm(ModelForm):
             },
             "description": {
                 "description": u"HTML",
+            },
+            "candidate_signup_until": {
+                "validators": [validators.Optional()],
+                "default": lambda: morning(days=1, at=8),
             }
         }
 BallotEditForm.submit = SubmitField(u'Uložit')

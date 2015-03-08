@@ -170,6 +170,7 @@ class Ballot(db.Model):
     protocols = db.relationship('BallotProtocol', backref='ballot',
                                 lazy='dynamic', order_by="desc(BallotProtocol.created_at)")
     candidate_self_signup = db.Column(db.Boolean, nullable=False, default=True, info={'label': u'Kandidáti se přihlašují sami'})
+    candidate_signup_until = db.Column(db.DateTime, nullable=False, info={'label': u'Přihlášení kandidátů do'})
 
     @property
     def in_time_progress(self):

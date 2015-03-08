@@ -533,6 +533,7 @@ def candidate_signup():
                .filter(Ballot.cancelled == False)
                .filter(Ballot.type == "ELECTION")
                .filter(Ballot.begin_at > datetime.datetime.now())
+               .filter(Ballot.candidate_signup_until > datetime.datetime.now())
                .order_by(Ballot.id.desc()))
     ballots = filter(g.user.can_candidate_signup, ballots)
     return render_template('candidate_signup.html', ballots=ballots)
@@ -558,6 +559,8 @@ def candidate_signup_confirm(ballot_id):
         raise BallotBoxError(u"Tato volba již probíhá.", 403)
     if not ballot.approved:
         raise BallotBoxError(u"Tato volba nebyla schválena volební komisí.", 403)
+    if ballot.candidate_signup_until < datetime.datetime.now():
+        raise BallotBoxError(u"Přihlašovnání do této volby již skončilo.", 403)
 
     if request.method == "POST":
         user_id = g.user.id
