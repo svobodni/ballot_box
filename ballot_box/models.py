@@ -16,6 +16,10 @@ class User(object):
         return self.profile["person"]["name"]
 
     @property
+    def canonical_name(self):
+        return " ".join((self.profile["person"]["last_name"].upper(), self.profile["person"]["first_name"]))
+
+    @property
     def email(self):
         return self.profile["person"]["email"]
 

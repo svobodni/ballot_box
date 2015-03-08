@@ -9,7 +9,7 @@
     prefetch: {
       url: BASE_URL+'registry/people.json',
       filter: function(json) {
-        return $.map(json["people"], function(person) { return { name: person["name"], id: person["id"]}; });
+        return $.map(json["people"], function(person) { return { name: person["last_name"].toUpperCase()+' '+person["first_name"], id: person["id"]}; });
       }
     }
   }); 

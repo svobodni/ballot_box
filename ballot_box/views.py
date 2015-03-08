@@ -572,7 +572,7 @@ def candidate_signup_confirm(ballot_id):
             flash(u"V této volbě již kandidujete.", "danger")
         else:
             db_option = BallotOption()
-            db_option.title = g.user.name
+            db_option.title = g.user.canonical_name
             db_option.user_id = int(user_id)
             db_option.ballot = ballot
             db.session.add(db_option)
