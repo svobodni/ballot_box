@@ -276,6 +276,17 @@ def ballot_protocol_new(ballot_id):
     return render_template('ballot_protocol_new.html', form=form)
 
 
+@app.route("/ballot/<int:ballot_id>/mail_template/")
+@login_required
+def ballot_mail_template(ballot_id):
+    if not g.user.can_edit_ballot():
+        abort(403)
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    return render_template('ballot_mail_template.html', ballot=ballot)
+
+
 @app.route("/protocol/<int:protocol_id>/edit", methods=('GET', 'POST'))
 @login_required
 def ballot_protocol_edit(protocol_id):

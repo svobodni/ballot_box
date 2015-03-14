@@ -127,34 +127,58 @@ class Connection(db.Model):
     profile = db.Column(db.UnicodeText)
     jwt = db.Column(db.Text)
 
+UNITS = [
+    ('country,1', u'Cel\xe1 republika'),
+    ('region,1', u'Jiho\u010desk\xfd kraj'),
+    ('region,2', u'Jihomoravsk\xfd kraj'),
+    ('region,3', u'Karlovarsk\xfd kraj'),
+    ('region,4', u'Kr\xe1lov\xe9hradeck\xfd kraj'),
+    ('region,5', u'Libereck\xfd kraj'),
+    ('region,6', u'Moravskoslezsk\xfd kraj'),
+    ('region,7', u'Olomouck\xfd kraj'),
+    ('region,8', u'Pardubick\xfd kraj'),
+    ('region,9', u'Plze\u0148sk\xfd kraj'),
+    ('region,10', u'Praha'),
+    ('region,11', u'St\u0159edo\u010desk\xfd kraj'),
+    ('region,12', u'\xdasteck\xfd kraj'),
+    ('region,13', u'Kraj Vyso\u010dina'),
+    ('region,14', u'Zl\xednsk\xfd kraj'),
+    ('body,1', u'Republikov\xe9 p\u0159edsednictvo'),
+    ('body,2', u'Kontroln\xed komise'),
+    ('body,3', u'Volebn\xed komise'),
+    ('body,4', u'Rozhod\u010d\xed komise'),
+    ('body,5', u'Republikov\xfd v\xfdbor')
+]
+
+UNITS_GREETING = dict([
+    ('country,1', u''),
+    ('region,1', u' v Jihočeském kraji'),
+    ('region,2', u' v Jihomoravském kraji'),
+    ('region,3', u' v Karlovarském kraji'),
+    ('region,4', u' v Královéhradeckém kraji'),
+    ('region,5', u' v Libereckém kraji'),
+    ('region,6', u' v Moravskoslezském kraji'),
+    ('region,7', u' v Olomouckém kraji'),
+    ('region,8', u' v Pardubickém kraji'),
+    ('region,9', u' v Plzeňském kraji'),
+    ('region,10', u'v Praze'),
+    ('region,11', u' ve Středočeském kraji'),
+    ('region,12', u' v Ústeckém kraji'),
+    ('region,13', u' v Kraji Vysočina'),
+    ('region,14', u've Zlínském kraji'),
+    ('body,1', u' v Republikovém předsednictvu'),
+    ('body,2', u' v Kontrolní komisi'),
+    ('body,3', u' ve Volební komisi'),
+    ('body,4', u' v Rozhodčí komisi'),
+    ('body,5', u' v Republikovém výboru')
+])
+
 
 class Ballot(db.Model):
     __tablename__ = "ballot"
     TYPES = [
         ("ELECTION", u'Volba'),
         ("VOTING", u'Hlasování')
-    ]
-    UNITS = [
-        ('country,1', u'Cel\xe1 republika'),
-        ('region,1', u'Jiho\u010desk\xfd kraj'),
-        ('region,2', u'Jihomoravsk\xfd kraj'),
-        ('region,3', u'Karlovarsk\xfd kraj'),
-        ('region,4', u'Kr\xe1lov\xe9hradeck\xfd kraj'),
-        ('region,5', u'Libereck\xfd kraj'),
-        ('region,6', u'Moravskoslezsk\xfd kraj'),
-        ('region,7', u'Olomouck\xfd kraj'),
-        ('region,8', u'Pardubick\xfd kraj'),
-        ('region,9', u'Plze\u0148sk\xfd kraj'),
-        ('region,10', u'Praha'),
-        ('region,11', u'St\u0159edo\u010desk\xfd kraj'),
-        ('region,12', u'\xdasteck\xfd kraj'),
-        ('region,13', u'Kraj Vyso\u010dina'),
-        ('region,14', u'Zl\xednsk\xfd kraj'),
-        ('body,1', u'Republikov\xe9 p\u0159edsednictvo'),
-        ('body,2', u'Kontroln\xed komise'),
-        ('body,3', u'Volebn\xed komise'),
-        ('body,4', u'Rozhod\u010d\xed komise'),
-        ('body,5', u'Republikov\xfd v\xfdbor')
     ]
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(100), nullable=False, info={'label': u'Název'})
@@ -211,6 +235,14 @@ class Ballot(db.Model):
     @property
     def approved_protocol(self):
         return self.protocols.filter(BallotProtocol.approved == True).first()
+
+    @property
+    def mail_greeting(self):
+        return UNITS_GREETING.get(self.unit.code, "")
+
+    @property
+    def mail_name(self):
+        return self.name[0].lower()+self.name[1:]
 
 
 class BallotOption(db.Model):

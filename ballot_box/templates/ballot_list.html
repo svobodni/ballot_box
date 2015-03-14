@@ -71,6 +71,9 @@
                   <a href="{{url_for('ballot_protocol_list', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-file-text-o"></i> Protokol</a>
                 {% endif %}  
               {% endif %}
+              {% if not ballot.in_time_finished %}
+                <a href="{{url_for('ballot_mail_template', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Vzor mailu"><i class="fa fa-envelope"></i></a>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
