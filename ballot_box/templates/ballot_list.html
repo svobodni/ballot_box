@@ -6,6 +6,12 @@
     {% if g.user.can_create_ballot %}
       <p><a href="{{url_for('ballot_new')}}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nová volba / hlasování</a></p>
     {% endif %}
+  </div>
+</div>
+</div>{# end container #}
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-12">
     <table class="table table-bordered">
       <thead>
         <tr><th>Název</th><th>Popis</th><th>Typ</th><th>Jednotka</th><th>Možnosti</th><th>Trvání</th><th>Stav</th><th>Akce</th></tr>
@@ -31,7 +37,12 @@
               {% endif %}
             </td>
             <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
-            <td>{{ballot.begin_at}} až {{ballot.finish_at}}</td>
+            <td>
+              {% if ballot.candidate_self_signup %}
+                přihl. {{ballot.candidate_signup_until}}, 
+              {% endif %}
+              {{ballot.begin_at}} až {{ballot.finish_at}}
+            </td>
             <td>
               {% if ballot.approved %}
                 <span class="label label-success">Schváleno</span>
@@ -67,4 +78,6 @@
     </table>
   </div>
 </div>
+</div>{# end container-fluid #}
+<div class="container">
 {% endblock %}
