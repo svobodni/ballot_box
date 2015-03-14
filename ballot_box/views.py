@@ -130,7 +130,7 @@ def login():
 def ballot_list():
     if not g.user.can_list_ballot():
         abort(403)
-    ballots = db.session.query(Ballot).order_by(Ballot.id.desc())
+    ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc())
     return render_template('ballot_list.html', ballots=ballots)
 
 
@@ -312,7 +312,7 @@ def polling_station():
                .filter(Ballot.approved == True)
                .filter(Ballot.finish_at >
                        datetime.datetime.now()-datetime.timedelta(days=60))
-               .order_by(Ballot.id.desc()))
+               .order_by(Ballot.begin_at.desc()))
     ballot_groups = {
         "not_voted": [],
         "already_voted": [],
@@ -534,7 +534,7 @@ def candidate_signup():
                .filter(Ballot.type == "ELECTION")
                .filter(Ballot.begin_at > datetime.datetime.now())
                .filter(Ballot.candidate_signup_until > datetime.datetime.now())
-               .order_by(Ballot.id.desc()))
+               .order_by(Ballot.begin_at.desc()))
     ballots = filter(g.user.can_candidate_signup, ballots)
     return render_template('candidate_signup.html', ballots=ballots)
 
