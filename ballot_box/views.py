@@ -13,10 +13,11 @@ import json
 import pickle
 import datetime
 from os import urandom
-from base64 import b64encode
+from base64 import b64encode, b64decode
 import hashlib
 from babel.dates import format_datetime
 import bleach
+import urllib
 
 
 def sanitize_html(html, extended=False):
@@ -29,8 +30,7 @@ def sanitize_html(html, extended=False):
 
 def force_auth():
     return redirect(app.config["REGISTRY_URI"] +
-                    "/auth/token?redirect_uri=" +
-                    url_for('login', _external=True))
+                    "/auth/token?"+urllib.urlencode({"redirect_uri": url_for('login', redirect_after=b64encode(request.url), _external=True)}))
 
 
 def login_required(f):
@@ -99,7 +99,8 @@ def index():
 
 
 @app.route("/login/")
-def login():
+@app.route("/login/<redirect_after>/")
+def login(redirect_after=None):
     jwt = request.args.get("jwt", False)
     if not jwt:
         return force_auth()
@@ -119,6 +120,8 @@ def login():
         db.session.commit()
         session["conn_id"] = conn.id
         session["conn_token"] = conn.token
+        if redirect_after:
+            return redirect(b64decode(redirect_after))
         return redirect(url_for("index"))
     except:
         raise
@@ -220,7 +223,7 @@ def ballot_options(ballot_id):
     return render_template('ballot_options.html', ballot=ballot)
 
 
-@app.route("/ballot/<int:ballot_id>/preview/", methods=('GET', 'POST'))
+@app.route("/ballot/<int:ballot_id>/preview/")
 @login_required
 def ballot_preview(ballot_id):
     if not g.user.can_edit_ballot_options():
