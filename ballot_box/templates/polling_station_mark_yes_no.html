@@ -4,6 +4,9 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Hlasovat</h3>
+    {% if ballot.type.code == "ELECTION" %}
+      <p><span class="label label-info">Info</span> <a href="https://forum.svobodni.cz/index.php/board,13.0.html" target="_blank">Diskuze kandidátů na fóru strany</a></p>
+    {% endif %}
     {% call ballot_panel_template(ballot) %}
       <form method="POST" action="{{url_for('polling_station_confirm', ballot_id=ballot.id)}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
