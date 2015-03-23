@@ -15,17 +15,20 @@ import datetime
 from os import urandom
 from base64 import b64encode, b64decode
 import hashlib
-from babel.dates import format_datetime
+from babel.dates import format_datetime, format_date
 import bleach
 import urllib
 
 
 def sanitize_html(html, extended=False):
     allowed_tags = bleach.ALLOWED_TAGS + ['p']
+    allowed_attrs = bleach.ALLOWED_ATTRIBUTES
     if extended:
         allowed_tags += ['p', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
                          'dd', 'dt', 'dl', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-    return bleach.clean(html, tags=allowed_tags)
+        allowed_attrs['*'] = ['class']
+
+    return bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs)
 
 
 def force_auth():
@@ -62,6 +65,11 @@ def login_required(f):
 @app.template_filter('fmt_dt')
 def fmt_dt_filter(dt):
     return format_datetime(dt, format='EEEE d.M.yyyy HH:mm', locale='cs_CZ')
+
+
+@app.template_filter('fmt_d')
+def fmt_d_filter(d):
+    return format_date(d, format='EEEE d.M.yyyy', locale='cs_CZ')
 
 
 @app.errorhandler(404)
@@ -272,7 +280,8 @@ def ballot_protocol_new(ballot_id):
                            ballot=ballot,
                            name=name,
                            date=today,
-                           result=result)
+                           result=result,
+                           elected=filter(lambda o: o["elected"], result))
     return render_template('ballot_protocol_new.html', form=form)
 
 
