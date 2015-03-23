@@ -296,6 +296,16 @@ def ballot_mail_template(ballot_id):
     return render_template('ballot_mail_template.html', ballot=ballot)
 
 
+@app.route("/protocol/")
+@app.route("/protokol/")
+@login_required
+def protocol_list():
+    protocols = (db.session.query(BallotProtocol)
+                           .filter(BallotProtocol.approved == True)
+                           .order_by(BallotProtocol.created_at.desc()))
+    return render_template('protocol_list.html', protocols=protocols)
+
+
 @app.route("/protocol/<int:protocol_id>/edit", methods=('GET', 'POST'))
 @login_required
 def ballot_protocol_edit(protocol_id):

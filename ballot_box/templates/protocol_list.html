@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Seznam protokolů</h3>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Název</th><th>Vytvořeno</th></tr>
+      </thead>
+      <tbody>
+        {% for protocol in protocols %}
+          <tr>
+            <td><a href="{{url_for('polling_station_result', ballot_id=protocol.ballot_id)}}">{{protocol.ballot.name}}</a></td>
+            <td><a href="{{url_for('protocol_item', protocol_id=protocol.id)}}">{{protocol.created_at|fmt_d}}</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
