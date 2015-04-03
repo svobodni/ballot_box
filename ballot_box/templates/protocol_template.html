@@ -55,5 +55,5 @@
 <p>Během voleb ani 12&nbsp;hodin po&nbsp;jejich ukončení se na&nbsp;volební komisi neobrátil nikdo, kdo by zpochybnil správnost průběhu voleb a&nbsp;důvěryhodnost jejich výsledku.
 <p>Volby proběhly řádně a&nbsp;nebyly shledány žádné okolnosti, které by zpochybnily jejich průběh a&nbsp;důvěryhodnost.</p>
 <p>
-  {% if elected|length <= 1 %}Byl zvolen {% else %}Byli zvoleni: {% endif %}{% for option in elected %}<strong>{{option["title"]}}</strong>{% if not loop.last %}{% if loop.revindex0 == 1 %}a&nbsp;{% else %}, {% endif %}{% endif %}{% endfor %}.
+  {% if elected|length <= 1 %}Byl zvolen {% else %}Byli zvoleni: {% endif %}{% for option in elected %}<strong>{{option["title"]}}</strong>{% if not loop.last %}{% if loop.revindex0 == 1 %} a&nbsp;{% else %}, {% endif %}{% endif %}{% endfor %}.
 </p>

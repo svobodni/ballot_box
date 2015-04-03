@@ -11,3 +11,15 @@
 textarea#description {
     font-family: monospace;
 }
+
+.panel-body.protocol {
+    padding: 10ex 6em 11ex;
+}
+
+.protocol dt {
+    width: 150px;
+}
+
+.protocol dd {
+    margin-left: 165px;
+}
