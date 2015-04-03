@@ -45,7 +45,15 @@
             </td>
             <td>
               {% if ballot.approved %}
-                <span class="label label-success">Schváleno</span>
+                {% if ballot.in_time_finished and not ballot.approved_protocol %}
+                  <span class="label label-warning">Není protokol</span>  
+                {% elif ballot.in_time_finished and ballot.approved_protocol %}
+                  <span class="label label-success">Hotovo</span>
+                {% elif ballot.in_time_progress %}
+                  <span class="label label-info">Probíhá</span>
+                {% else %}
+                  <span class="label label-success">Schváleno</span>
+                {% endif %}
               {% endif %}
               {% if ballot.cancelled %}
                 <span class="label label-danger">Zrušeno</span>
@@ -64,7 +72,7 @@
                   <a href="{{url_for('ballot_preview', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Náhled hlasovácí místnosti"><i class="fa fa-eye"></i></a>
                 {% endif %}
               {% elif ballot.in_time_progress %}
-                Probíhá
+                {# in progress #}
               {% elif ballot.in_time_finished %}
                 <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-list-ol"></i> Výsledek</a>
                 {% if g.user.can_edit_ballot %}
