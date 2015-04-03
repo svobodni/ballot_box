@@ -3,6 +3,11 @@
 {% if not protocol.approved %}
     <div class="alert alert-danger" role="alert">Protokol ještě nebyl schválen!</div>
 {% endif %}
+{% if protocol.body_pdf %}
+<p>
+    <br/><a href="{{url_for('protocol_item_pdf', protocol_id=protocol.id)}}"><i class="fa fa-file-pdf-o"></i> PDF verze</a>
+</p>
+{% endif %}
 <div class="panel panel-default">
   <div class="panel-body protocol">
     {{protocol.body_html|safe}}

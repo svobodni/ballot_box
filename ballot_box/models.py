@@ -3,6 +3,7 @@ from ballot_box import db
 from sqlalchemy_utils import ChoiceType
 from wtforms import SelectField
 from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy.orm import deferred
 import datetime
 
 
@@ -282,4 +283,5 @@ class BallotProtocol(db.Model):
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
     created_at = db.Column(db.DateTime, default=lambda: datetime.datetime.now())
     body_html = db.Column(db.UnicodeText, nullable=False, info={'label': u'HTML tělo'})
+    body_pdf = deferred(db.Column(db.LargeBinary, nullable=True, info={'label': u'PDF'}))
     approved = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Schváleno'})

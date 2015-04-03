@@ -8,3 +8,4 @@ WTForms-Alchemy
 Babel
 bleach
 Flask-Mail
+weasyprint

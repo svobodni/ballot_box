@@ -18,6 +18,7 @@ import hashlib
 from babel.dates import format_datetime, format_date
 import bleach
 import urllib
+import weasyprint
 
 
 def sanitize_html(html, extended=False):
@@ -318,6 +319,9 @@ def ballot_protocol_edit(protocol_id):
     if form.validate_on_submit():
         form.populate_obj(protocol)
         protocol.body_html = sanitize_html(protocol.body_html, extended=True)
+        w = weasyprint.HTML(string=protocol.body_html)
+        with app.open_resource('static/bootstrap_print.css') as css:
+            protocol.body_pdf = w.write_pdf(stylesheets=[weasyprint.CSS(css)])
         db.session.add(protocol)
         db.session.commit()
         flash(u"Protokol úspěšně uložen.", "success")
@@ -335,6 +339,18 @@ def protocol_item(protocol_id):
     if not g.user.can_edit_ballot() and not protocol.approved:
         raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
     return render_template('protocol_item.html', protocol=protocol)
+
+
+@app.route("/protocol/<int:protocol_id>.pdf")
+@app.route("/protokol/<int:protocol_id>.pdf")
+@login_required
+def protocol_item_pdf(protocol_id):
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+    if protocol is None or not protocol.body_pdf:
+        abort(404)
+    if not g.user.can_edit_ballot() and not protocol.approved:
+        raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
+    return protocol.body_pdf, 200, {'Content-Type': 'application/pdf'}
 
 
 @app.route("/polling_station/")
