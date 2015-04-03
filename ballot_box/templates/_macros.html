@@ -42,8 +42,10 @@
         Nyní neprobíhá.
       {% elif g.user.already_voted(ballot) %}
         Již jste hlasoval/a.
-      {% else %}
+      {% elif g.user.can_vote(ballot) %}
         <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a>
+      {% else %}
+        Nemáte právo hlasovat.
       {% endif %}
     </p>
   {% endcall %}
