@@ -57,3 +57,8 @@
 <p>
   {% if elected|length <= 1 %}Byl zvolen {% else %}Byli zvoleni: {% endif %}{% for option in elected %}<strong>{{option["title"]}}</strong>{% if not loop.last %}{% if loop.revindex0 == 1 %} a&nbsp;{% else %}, {% endif %}{% endif %}{% endfor %}.
 </p>
+{%- if not ballot.is_yes_no and elected|length < ballot.max_votes %}
+<p>
+  Vzhledem ke shodě počtu hlasů na posledním voleném míste bude následovat užší volba.  
+</p>
+{%- endif %}
