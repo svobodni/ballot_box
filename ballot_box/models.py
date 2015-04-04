@@ -244,6 +244,10 @@ class Ballot(db.Model):
     def mail_name(self):
         return self.name[0].lower()+self.name[1:]
 
+    @property
+    def type_short(self):
+        return self.type.value[0]
+
 
 class BallotOption(db.Model):
     __tablename__ = "ballot_option"

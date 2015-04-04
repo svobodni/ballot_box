@@ -22,7 +22,7 @@
             <td>{{ballot.name}}</td>
             <td class="pre">{{ballot.description|safe}}</td>
             <td>
-              {{ballot.type}}
+              {{ballot.type_short}}
               {% if ballot.is_yes_no %}
                 <i class="fa fa-thumbs-up"></i>/<i class="fa fa-thumbs-down"></i>
               {% else %}
@@ -39,9 +39,10 @@
             <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
             <td>
               {% if ballot.candidate_self_signup %}
-                přihl. {{ballot.candidate_signup_until}}, 
+                přihl. {{ballot.candidate_signup_until}}<br/>
               {% endif %}
-              {{ballot.begin_at}} až {{ballot.finish_at}}
+              od {{ballot.begin_at}}<br/>
+              do {{ballot.finish_at}}
             </td>
             <td>
               {% if ballot.approved %}
