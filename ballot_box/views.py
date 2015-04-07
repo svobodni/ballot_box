@@ -5,7 +5,7 @@ from models import (Connection, User, Ballot, BallotOption, Vote, Voter,
 from forms import BallotForm, BallotEditForm, BallotProtocolForm, BallotProtocolEditForm
 from registry import registry_request, send_vote_confirmation
 from flask import (render_template, g, request, redirect, url_for, session,
-                   abort, flash)
+                   abort, flash, Markup)
 from wtforms.validators import ValidationError
 from functools import wraps
 from collections import defaultdict
@@ -65,6 +65,11 @@ def login_required(f):
 @app.template_filter('fmt_dt')
 def fmt_dt_filter(dt):
     return format_datetime(dt, format='EEEE d.M.yyyy HH:mm', locale='cs_CZ')
+
+
+@app.template_filter('fmt_dt_line')
+def fmt_dt_line_filter(dt):
+    return Markup("&nbsp;".join(format_datetime(dt, format='d.M.yyyy HH:mm', locale='cs_CZ').split(" ")))
 
 
 @app.template_filter('fmt_d')

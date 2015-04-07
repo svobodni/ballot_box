@@ -14,7 +14,7 @@
   <div class="col-md-12">
     <table class="table table-bordered">
       <thead>
-        <tr><th>Název</th><th>Popis</th><th>Typ</th><th>Jednotka</th><th>Možnosti</th><th>Trvání</th><th>Stav</th><th>Akce</th></tr>
+        <tr><th>Název</th><th>Popis</th><th style="width:5em;">Typ</th><th>Jednotka</th><th>Možnosti</th><th>Trvání</th><th>Stav</th><th>Akce</th></tr>
       </thead>
       <tbody>
         {% for ballot in ballots %}
@@ -28,7 +28,6 @@
               {% else %}
                 <i class="fa fa-list-ol"></i>
               {% endif %}
-
             </td>
             <td>
               {{ballot.unit}}
@@ -37,12 +36,9 @@
               {% endif %}
             </td>
             <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
-            <td>
-              {% if ballot.candidate_self_signup %}
-                přihl. {{ballot.candidate_signup_until}}<br/>
-              {% endif %}
-              od {{ballot.begin_at}}<br/>
-              do {{ballot.finish_at}}
+            <td>{% if ballot.candidate_self_signup %}přihl.&nbsp;{{ballot.candidate_signup_until|fmt_dt_line}}<br/>{% endif %}
+              od&nbsp;{{ballot.begin_at|fmt_dt_line}}<br/>
+              do&nbsp;{{ballot.finish_at|fmt_dt_line}}
             </td>
             <td>
               {% if ballot.approved %}
