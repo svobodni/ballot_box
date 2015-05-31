@@ -43,6 +43,16 @@
           </li>
         {% endfor %}
       </ol>
+      {% if ballot.abstainers %}
+        <p>Zdrželo se: {{ballot.abstainers.count()}}</p>
+        <div class="hashes hidden">
+          <samp class="small">
+            {% for a in ballot.abstainers %}
+              {{a.hash_digest}}
+            {% endfor %}
+          </samp>
+        </div>
+      {% endif %}
     {% endcall %}
     </div>
   </div>
