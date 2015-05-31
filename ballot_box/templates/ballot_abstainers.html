@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Potvrzení o zdření se hlasování {{ballot.name}}</h3>
+    {% if abstainers_len <= 0 %}
+      <p>Seznam nevoličů je prázdný.
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-primary" type="submit" name="add_abstainers" value="add_abstainers">Přidat nevoliče</button>
+      </form>
+      Tato akce je asynchronní, výsledky se projeví za chvíli.
+      </p>
+    {% else %}
+      {{ abstainers_len }} oprávněných voličů nehlasovalo.<br />
+      {{ abstainers_unconfirmed_len }} potvrzení neodesláno.
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-primary" type="submit" name="send_abstainer_confirmations" value="send_abstainer_confirmations">Odeslat potvrzení emailem</button>
+        Tato akce je asynchronní.
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

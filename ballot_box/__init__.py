@@ -4,6 +4,7 @@ from flask_bootstrap import Bootstrap
 from werkzeug.contrib.cache import SimpleCache
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.mail import Mail
+from celery import Celery
 
 
 class BallotBoxError(Exception):
@@ -29,6 +30,25 @@ CsrfProtect(app)
 mail = Mail(app)
 
 db = SQLAlchemy(app)
+
+
+def make_celery(app):
+    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+celery = make_celery(app)
+import tasks
 
 cache = SimpleCache()
 

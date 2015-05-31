@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from ballot_box import app, db, BallotBoxError
+from ballot_box import app, db, BallotBoxError, tasks
 from models import (Connection, User, Ballot, BallotOption, Vote, Voter,
                     BallotProtocol)
 from forms import BallotForm, BallotEditForm, BallotProtocolForm, BallotProtocolEditForm
-from registry import registry_request, send_vote_confirmation
+from registry import registry_request, send_vote_confirmation, get_jwt
 from flask import (render_template, g, request, redirect, url_for, session,
                    abort, flash, Markup)
 from wtforms.validators import ValidationError
@@ -299,6 +299,29 @@ def ballot_mail_template(ballot_id):
     if ballot is None:
         abort(404)
     return render_template('ballot_mail_template.html', ballot=ballot)
+
+
+@app.route("/ballot/<int:ballot_id>/abstainers/", methods=('GET', 'POST'))
+@login_required
+def ballot_abstainers(ballot_id):
+    if not g.user.can_edit_ballot():
+        abort(403)
+    ballot = db.session.query(Ballot).get(ballot_id)
+    if ballot is None:
+        abort(404)
+    if not ballot.is_finished:
+        abort(404)
+    if request.method == "POST" and request.values.get("add_abstainers"):
+        tasks.add_abstainers.delay(ballot_id=ballot.id, jwt=get_jwt())
+        flash(u"Akce přidání nevoličů asynchronně spuštěna.", "success")
+    elif request.method == "POST" and request.values.get("send_abstainer_confirmations"):
+        tasks.send_abstainer_confirmations.delay(ballot_id=ballot.id)
+        flash(u"Akce odeslání potvrzení nevoličům asynchronně spuštěna.", "success")
+    abstainers = list(ballot.abstainers)
+    return render_template('ballot_abstainers.html',
+                           ballot=ballot,
+                           abstainers_len=len(abstainers),
+                           abstainers_unconfirmed_len=sum(1 for a in abstainers if not a.confirmation_sent))
 
 
 @app.route("/protocol/")

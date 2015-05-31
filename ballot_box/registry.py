@@ -77,3 +77,15 @@ def send_vote_confirmation(ballot, voter, hash_digest, jwt=None):
                           data=json.dumps(email_dict))
         if r.status_code != requests.codes.ok:
             raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")
+
+
+def registry_get_people(members_only=False, region_id=None, jwt=None):
+    r = registry_request("/people.json{0}".format("?region_id={0}".format(region_id) if region_id else ""), jwt=jwt)
+    people = r.json()["people"]
+    if region_id and members_only:
+        return [p for p in people if p.get("domestic_region", {}).get("id", -1) == region_id and p.get("type", "") == "member"]
+    elif region_id:
+        return [p for p in people if p.get("domestic_region", {}).get("id", -1) == region_id]
+    elif members_only:
+        return [p for p in people if p.get("type", "") == "member"]
+    return people
