@@ -219,6 +219,11 @@ class Ballot(db.Model):
         return self.in_time_finished
 
     @property
+    def in_time_candidate_signup(self):
+        now = datetime.datetime.now()
+        return self.candidate_signup_until > now
+
+    @property
     def is_election(self):
         return self.type == "ELECTION"
 

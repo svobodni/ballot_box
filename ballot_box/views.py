@@ -571,7 +571,6 @@ def candidate_signup():
                .filter(Ballot.cancelled == False)
                .filter(Ballot.type == "ELECTION")
                .filter(Ballot.begin_at > datetime.datetime.now())
-               .filter(Ballot.candidate_signup_until > datetime.datetime.now())
                .order_by(Ballot.begin_at.desc()))
     ballots = filter(g.user.can_candidate_signup, ballots)
     return render_template('candidate_signup.html', ballots=ballots)
