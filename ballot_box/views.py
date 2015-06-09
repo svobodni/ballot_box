@@ -64,17 +64,17 @@ def login_required(f):
 
 @app.template_filter('fmt_dt')
 def fmt_dt_filter(dt):
-    return format_datetime(dt, format='EEEE d.M.yyyy HH:mm', locale='cs_CZ')
+    return format_datetime(dt, format='EEEE d. M. yyyy HH:mm', locale='cs_CZ')
 
 
 @app.template_filter('fmt_dt_line')
 def fmt_dt_line_filter(dt):
-    return Markup("&nbsp;".join(format_datetime(dt, format='d.M.yyyy HH:mm', locale='cs_CZ').split(" ")))
+    return Markup("&nbsp;".join(format_datetime(dt, format='d. M. yyyy HH:mm', locale='cs_CZ').split(" ")))
 
 
 @app.template_filter('fmt_d')
 def fmt_d_filter(d):
-    return format_date(d, format='EEEE d.M.yyyy', locale='cs_CZ')
+    return format_date(d, format='EEEE d. M. yyyy', locale='cs_CZ')
 
 
 @app.errorhandler(404)
