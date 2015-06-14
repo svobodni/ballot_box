@@ -79,9 +79,9 @@ class BallotForm(ModelForm):
                 "description": u"HTML",
             },
             "candidate_signup_until": {
-                "validators": [validators.Optional(), Difference("begin_at", difference=datetime.timedelta(hours=-24), message=u"Konec přihlašování musí být nejméně 24 hodin před začátkém voleb.", reverse=True)],
+                "validators": [validators.Optional(), Difference("begin_at", difference=datetime.timedelta(hours=-24), message=u"Konec přihlašování musí být nejméně 24 hodin před začátkem voleb.", reverse=True)],
                 "default": lambda: morning(days=1, at=8),
-                "description": u"Nejméně 24 hodin před začátkém voleb",
+                "description": u"Nejméně 24 hodin před začátkem voleb",
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
