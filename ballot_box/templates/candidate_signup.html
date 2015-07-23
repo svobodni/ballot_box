@@ -21,7 +21,9 @@
           </div>
         {% endfor %}
         <p>
-          {% if ballot.in_time_candidate_signup %}
+          {% if not g.user.can_candidate_signup(ballot) %}
+            V této volbě nemůžete kandidovat.
+          {% elif ballot.in_time_candidate_signup %}
             <a href="{{url_for('candidate_signup_confirm', ballot_id=ballot.id)}}" class="btn btn-primary">Podat kandidaturu...</a>
           {% else %}
             Kandidaturu již není možné podat.
