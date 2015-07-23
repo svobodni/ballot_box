@@ -6,7 +6,7 @@
     <h3>Podání kandidatury</h3>
     <p><span class="label label-info">Info</span> <a href="https://forum.svobodni.cz/index.php/board,13.0.html" target="_blank">Diskuze kandidátů na fóru strany</a></p>
     {% for ballot in ballots %}
-      {% call ballot_panel_template(ballot, False) %}
+      {% call ballot_panel_template(ballot, False, not g.user.can_candidate_signup(ballot)) %}
         {% if ballot.options %}
           Přihlášení kandidáti:
         {% else %}
@@ -21,7 +21,9 @@
           </div>
         {% endfor %}
         <p>
-          {% if ballot.in_time_candidate_signup %}
+          {% if not g.user.can_candidate_signup(ballot) %}
+            V této volbě nemůžete kandidovat.
+          {% elif ballot.in_time_candidate_signup %}
             <a href="{{url_for('candidate_signup_confirm', ballot_id=ballot.id)}}" class="btn btn-primary">Podat kandidaturu...</a>
           {% else %}
             Kandidaturu již není možné podat.

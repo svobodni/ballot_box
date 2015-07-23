@@ -8,6 +8,11 @@
     margin-bottom: 0;
 }
 
+.panel-inactive {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
 textarea#description {
     font-family: monospace;
 }
