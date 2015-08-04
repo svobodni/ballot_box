@@ -572,7 +572,9 @@ def candidate_signup():
                .filter(Ballot.type == "ELECTION")
                .filter(Ballot.begin_at > datetime.datetime.now())
                .order_by(Ballot.begin_at.desc()))
-    ballots = filter(g.user.can_candidate_signup, ballots)
+    # Show ballots where the user can sign up first (stored is stable, so it
+    # keeps the time ordering)
+    ballots = sorted(ballots, key=lambda b: g.user.can_candidate_signup(b), reverse=True)
     return render_template('candidate_signup.html', ballots=ballots)
 
 

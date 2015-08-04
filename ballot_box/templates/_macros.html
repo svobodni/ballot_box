@@ -10,8 +10,8 @@
   </p>
 {%- endmacro %}
 
-{% macro ballot_panel_template(ballot, hr=True) -%}
-  <div class="panel panel-default">
+{% macro ballot_panel_template(ballot, hr=True, inactive=False) -%}
+  <div class="panel panel-default{% if inactive %} panel-inactive{% endif %}">
     <div class="panel-heading">
       <h3 class="panel-title">{{ballot.name}}</h3>
     </div>
@@ -21,7 +21,7 @@
     {% if hr %}
     </div>
     <hr/>
-    <div class="panel-body">  
+    <div class="panel-body">
     {% endif %}
       {{caller()}}
     </div>
@@ -79,4 +79,3 @@
     });
   </script>
 {%- endmacro %}
-
