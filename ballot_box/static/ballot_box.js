@@ -20,7 +20,10 @@ $(document).ready(function() {
                         } else if(t == "facebook_profile") {
                             html += '<a href="'+v+'"><i class="fa fa-facebook fa-fw"></i> FB profil</a>';
                         } else if(t == "twitter") {
-                            html += '<a href="https://twitter.com/'+v+'"><i class="fa fa-twitter fa-fw"></i> Twitter</a>';
+                            if (!/^https?:\/\//i.test(v)) {
+                                v = 'https://twitter.com/' + v;
+                            }
+                            html += '<a href="'+v+'"><i class="fa fa-twitter fa-fw"></i> Twitter</a>';
                         } else if(t == "web") {
                             if (!/^https?:\/\//i.test(v)) {
                                 v = 'http://' + v;
