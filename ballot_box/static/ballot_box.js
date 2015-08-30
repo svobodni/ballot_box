@@ -29,6 +29,11 @@ $(document).ready(function() {
                                 v = 'http://' + v;
                             }
                             html += '<a href="'+v+'"><i class="fa fa-globe fa-fw"></i> Web</a>';
+                        } else if(t == "forum") {
+                            if (!/^https?:\/\//i.test(v)) {
+                                v = 'http://' + v;
+                            }
+                            html += '<a href="'+v+'"><i class="fa fa-users fa-fw"></i> Fórum - kandidátské vlákno</a>';
                         } else if(t == "blog") {
                             html += '<a href="'+v+'"><i class="fa fa-book fa-fw"></i> Blog</a>';
                         } else if(t == "google_plus") {
