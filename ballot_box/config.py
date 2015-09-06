@@ -9,6 +9,7 @@ class Config(object):
     SECRET_KEY = "not a secret"
     LOGIN_TIMEOUT = datetime.timedelta(minutes=30)
     USE_SMTP = False
+    MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB
 
 
 class ProductionConfig(Config):
