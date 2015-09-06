@@ -1,6 +1,21 @@
 {% from '_macros.html' import ballot_panel_template %}
 {% extends "base.html" %}
 {% block body %}
+<script type="text/javascript" src="{{ url_for('static', filename='sha1.js')}}"></script>
+<script type="text/javascript">
+  function updateHash() {
+    var shaObj = new jsSHA("SHA-1", "TEXT");
+    var salt = $("#hash_salt").val();
+    var base = $("#hash_base").val();
+    shaObj.update(base);
+    shaObj.update(salt);
+    $("#hash_result").val(base+salt+"\n"+shaObj.getHash("HEX"));
+  }
+  $(document).ready(function() {
+    updateHash();
+    $("#hash_salt").on("input", updateHash);
+  }); 
+</script>
 <div class="row">
   <div class="col-md-12">
     <h3>Potvrdit hlas</h3>
@@ -16,10 +31,15 @@
             {% endfor %}  
           </ul>  
         </div>
+        <input id="hash_base" class="form-control" type="hidden" name="hash_base" value="{{ hash_base }}"/>
         <div class="form-group">
-          <label for="hash_base">Základ kontrolního řetězce</label>
-          <input id="hash_base" class="form-control" type="text" name="hash_base" value="{{ hash_base }}" />
-          <p class="help-block">Můžete libovolně změnit</p>
+          <label for="hash_salt">Náhodná část kontrolního řetězce</label>
+          <input id="hash_salt" class="form-control" type="text" name="hash_salt" value="{{ hash_salt }}"/>
+          <p class="help-block">Můžete libovolně změnit. Kontrolní řetězec je SHA1 hash spojení základu a náhodné části.</p>
+        </div>
+        <div class="form-group">
+          <label for="hash_result">Výsledný kontrolní řetězec</label>
+          <textarea rows="2" id="hash_result" class="form-control monospace" type="text" name="hash_result" readonly></textarea>
         </div>
         <button id="btn-continue" type="submit" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Potvrdit hlasování</button>
       </form>

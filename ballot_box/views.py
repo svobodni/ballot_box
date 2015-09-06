@@ -12,6 +12,7 @@ from collections import defaultdict
 import json
 import pickle
 import datetime
+import time
 from os import urandom
 from base64 import b64encode, b64decode
 import hashlib
@@ -414,6 +415,11 @@ def validate_options(input_options, ballot):
     return True
 
 
+def compute_hash_base(ballot_id, user_id, input_options, vote_timestamp):
+    io_str = "[{}]".format(",".join(("{}:{}".format(k, input_options[k]) for k in sorted(input_options.keys()))))
+    return "{}*{}*{}*{}*".format(ballot_id, user_id, io_str, vote_timestamp)
+
+
 @app.route("/polling_station/<int:ballot_id>/confirm/", methods=('POST',))
 @app.route("/volebni_mistnost/<int:ballot_id>/potvrdit/", methods=('POST',))
 @login_required
@@ -446,13 +452,18 @@ def polling_station_confirm(ballot_id):
     summary = [{"title": title_dict[option_id], "value":input_options[option_id]}
                for option_id in sorted(input_options.keys(), key=lambda x: title_dict[x])]
     input_options_pickle = pickle.dumps(input_options)
-    hash_base = "{}*{}*{}*{}".format(ballot_id, g.user.id, input_options, b64encode(urandom(30))[:15])
+
+    vote_timestamp = int(time.time())
+    session["vote_timestamp_{}".format(ballot_id)] = vote_timestamp
+    hash_base = compute_hash_base(ballot_id, g.user.id, input_options, vote_timestamp)
+    hash_salt = b64encode(urandom(30))[:15]
 
     return render_template('polling_station_confirm.html',
                            ballot=ballot,
                            options_summary=summary,
                            input_options_data=input_options_pickle,
-                           hash_base=hash_base)
+                           hash_base=hash_base,
+                           hash_salt=hash_salt)
 
 
 @app.route("/polling_station/<int:ballot_id>/vote/", methods=('POST',))
@@ -474,11 +485,19 @@ def polling_station_vote(ballot_id):
         flash(u"Některý z hlasů má neplatnou hodnotu", "danger")
         return redirect(url_for('polling_station_item', ballot_id=ballot_id))
 
-    hash_base = request.form["hash_base"]
-    h = hashlib.sha1()
-    h.update(hash_base.encode("utf-8"))
-    # h.update(urandom(30))
-    hash_digest = h.hexdigest()
+    try:
+        vote_timestamp = session.get("vote_timestamp_{}".format(ballot_id), False)
+        if not vote_timestamp:
+            raise ValidationError()
+        hash_base = compute_hash_base(ballot_id, g.user.id, input_options, vote_timestamp)
+        hash_salt = request.form["hash_salt"]
+        h = hashlib.sha1()
+        h.update(hash_base.encode("utf-8"))
+        h.update(hash_salt.encode("utf-8"))
+        hash_digest = h.hexdigest()
+    except Exception as e:
+        flash(u"Chyba při výpočtu kontrolního řetězce", "danger")
+        return redirect(url_for('polling_station_item', ballot_id=ballot_id))
 
     for (option_id, value) in input_options.items():
         vote = Vote()
@@ -497,12 +516,12 @@ def polling_station_vote(ballot_id):
     voter.user_agent = request.user_agent.string
     db.session.add(voter)
 
-    send_vote_confirmation(ballot, voter, hash_digest)
+    email_body = send_vote_confirmation(ballot, voter, hash_digest, hash_salt, vote_timestamp)
 
     db.session.commit()
 
     return render_template('polling_station_vote.html',
-                           ballot=ballot, hash_digest=hash_digest)
+                           ballot=ballot, hash_digest=hash_digest, email_body=email_body)
 
 
 def ballot_result(ballot):

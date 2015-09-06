@@ -45,11 +45,13 @@ def registry_units():
     return units
 
 
-def send_vote_confirmation(ballot, voter, hash_digest, jwt=None):
+def send_vote_confirmation(ballot, voter, hash_digest, hash_salt, vote_timestamp, jwt=None):
     body = render_template('confirmation_email.txt',
                            ballot=ballot,
                            voter=voter,
-                           hash_digest=hash_digest)
+                           hash_digest=hash_digest,
+                           hash_salt=hash_salt,
+                           vote_timestamp=vote_timestamp)
 
     if app.config["USE_SMTP"]:
         msg = Message("Potvrzení hlasování",
@@ -77,3 +79,5 @@ def send_vote_confirmation(ballot, voter, hash_digest, jwt=None):
                           data=json.dumps(email_dict))
         if r.status_code != requests.codes.ok:
             raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")
+
+    return body
