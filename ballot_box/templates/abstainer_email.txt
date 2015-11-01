@@ -1,0 +1,7 @@
+Oznamujeme, že jste nevyužil(a) svého hlasovacího práva. Toto je automatický email odeslaný po skončení volby. Volební systém nearchivuje kdo jak volil, ale zaznamenává hlasy pro jednotlivé kandidáty. Ověřte si prosím, že se váš anonymní kontrolní řetězec nachází mezi nehlasujícími na {{url_for('polling_station_result', ballot_id=ballot.id, _external=True)}} .
+
+Jméno voliče: {{abstainer.name}}
+Volba: {{ballot.name}}
+Náhodná část kontrolního řetězce: {{abstainer.hash_salt}}
+Časové razítko: {{timestamp}}
+Kontrolní řetězec: {{abstainer.hash_digest}}

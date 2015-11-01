@@ -9,8 +9,10 @@
         <h3 class="panel-title">{{ballot.name}}</h3>
       </div>
       <div class="panel-body">
-        <p>Potvrzení o hlasování bylo odesláno na Vaši e-mailovou adresu.</p>
-        <p>Kontrolní řetezec: <pre>{{hash_digest}}</pre></p>
+        <p>Následující potvrzení o hlasování bylo odesláno na Vaši e-mailovou adresu. Pro případ, že e-mail nedorazí, si jej prosím ihned uložte nebo vytiskněte.</p>
+        <p>
+          <pre>{{email_body}}</pre>
+        </p>
       </div>
     </div>
     <p><a class="btn btn-primary "href="{{url_for('polling_station')}}"><i class="fa fa-arrow-left"></i> Zpět do volební místnosti</a></p>

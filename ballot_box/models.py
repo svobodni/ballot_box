@@ -195,6 +195,8 @@ class Ballot(db.Model):
     options = db.relationship('BallotOption', backref='ballot',
                               lazy='select', order_by="BallotOption.title")
     voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
+    abstainers = db.relationship('Abstainer', backref='ballot', lazy='dynamic',
+                                 order_by="Abstainer.hash_digest")
     protocols = db.relationship('BallotProtocol', backref='ballot',
                                 lazy='dynamic', order_by="desc(BallotProtocol.created_at)")
     candidate_self_signup = db.Column(db.Boolean, nullable=False, default=True, info={'label': u'Kandidáti se přihlašují sami'})
@@ -283,6 +285,20 @@ class Voter(db.Model):
     voted_at = db.Column(db.DateTime)
     remote_addr = db.Column(db.String(50))
     user_agent = db.Column(db.String(500))
+
+
+class Abstainer(db.Model):
+    __tablename__ = "abstainer"
+    __table_args__ = (UniqueConstraint("ballot_id", "person_id"),)
+    id = db.Column(db.Integer, primary_key=True)
+    ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
+    created_at = db.Column(db.DateTime)
+    name = db.Column(db.Unicode(100))
+    email = db.Column(db.Unicode(100))
+    person_id = db.Column(db.Integer)
+    hash_salt = db.Column(db.Unicode(100))
+    hash_digest = db.Column(db.Unicode(100))
+    confirmation_sent = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class BallotProtocol(db.Model):
