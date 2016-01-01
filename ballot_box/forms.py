@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
+
 import datetime
-from wtforms import SubmitField, SelectField
-from models import Ballot, BallotProtocol
-from wtforms_components import DateRange
+
 from flask.ext.wtf import Form
+from wtforms import SubmitField, validators
 from wtforms_alchemy import model_form_factory
-from wtforms import validators
+from wtforms_components import DateRange
+# Workaround to fix lambdas in DateRange(min)
+from wtforms_components.widgets import BaseDateTimeInput
+
 # The variable db here is a SQLAlchemy object instance from
 # Flask-SQLAlchemy package
 from ballot_box import db
-from registry import registry_units
+from models import Ballot, BallotProtocol
 
-# Workaround to fix lambdas in DateRange(min)
-from wtforms_components.widgets import BaseDateTimeInput
 BaseDateTimeInput.range_validator_class = int
 
 BaseModelForm = model_form_factory(Form)
@@ -34,6 +35,11 @@ def midnight(days=8):
             .replace(hour=23, minute=59, second=59))
 
 
+def min_timedelta(*args, **kwargs):
+    return lambda: datetime.datetime.now() \
+        + datetime.timedelta(*args, **kwargs)
+
+
 class Difference(object):
     def __init__(self, fieldname, difference, message, reverse=False):
         self.fieldname = fieldname
@@ -45,7 +51,9 @@ class Difference(object):
         try:
             other = form[self.fieldname]
         except KeyError:
-            raise validators.ValidationError(field.gettext("Invalid field name '%s'.") % self.fieldname)
+            raise validators.ValidationError(
+                field.gettext("Invalid field name '%s'.") % self.fieldname
+            )
         try:
             if not self.reverse and field.data - other.data <= self.difference:
                 raise validators.ValidationError(self.message)
@@ -67,11 +75,20 @@ class BallotForm(ModelForm):
                 "description": u"Např. Volba předsedy Jihomoravského KrS",
             },
             "begin_at": {
-                "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(hours=1), message=u"Začátek musí být nejméně za hodinu.")],
+                "validators": [
+                    DateRange(
+                        min=min_timedelta(hours=1),
+                        message=u"Začátek musí být nejméně za hodinu."),
+                ],
                 "default": lambda: morning(days=2, at=9),
             },
             "finish_at": {
-                "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
+                "validators": [
+                    Difference(
+                        "begin_at",
+                        difference=datetime.timedelta(hours=72),
+                        message=u"Trvání musí být nejméně 72 hodin."),
+                    ],
                 "default": lambda: midnight(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
             },
@@ -79,7 +96,16 @@ class BallotForm(ModelForm):
                 "description": u"HTML",
             },
             "candidate_signup_until": {
-                "validators": [validators.Optional(), Difference("begin_at", difference=datetime.timedelta(hours=-24), message=u"Konec přihlašování musí být nejméně 24 hodin před začátkem voleb.", reverse=True)],
+                "validators": [
+                    validators.Optional(),
+                    Difference(
+                        "begin_at",
+                        difference=datetime.timedelta(hours=-24),
+                        message=u"Konec přihlašování musí být "
+                        u"nejméně 24 hodin před začátkem voleb.",
+                        reverse=True
+                    ),
+                ],
                 "default": lambda: morning(days=1, at=8),
                 "description": u"Nejméně 24 hodin před začátkem voleb",
             }
@@ -99,11 +125,22 @@ class BallotEditForm(ModelForm):
                 "validators": [validators.Length(min=10)],
             },
             "begin_at": {
-                "validators": [DateRange(min=lambda: datetime.datetime.now()+datetime.timedelta(minutes=5), message=u"Začátek musí být nejméně za 5 minut.")],
+                "validators": [
+                    DateRange(
+                        min=min_timedelta(minutes=5),
+                        message=u"Začátek musí být nejméně za 5 minut."
+                    ),
+                ],
                 "default": lambda: morning(days=2, at=9),
             },
             "finish_at": {
-                "validators": [Difference("begin_at", difference=datetime.timedelta(hours=72), message=u"Trvání musí být nejméně 72 hodin.")],
+                "validators": [
+                    Difference(
+                        "begin_at",
+                        difference=datetime.timedelta(hours=72),
+                        message=u"Trvání musí být nejméně 72 hodin.",
+                    )
+                ],
                 "default": lambda: midnight(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
             },

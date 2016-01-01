@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from ballot_box import db
-from sqlalchemy_utils import ChoiceType
-from wtforms import SelectField
-from sqlalchemy.schema import UniqueConstraint
+
 import datetime
+
+from wtforms import SelectField
+from sqlalchemy_utils import ChoiceType
+from sqlalchemy.schema import UniqueConstraint
+
+from ballot_box import db
 
 
 class User(object):
@@ -17,7 +20,10 @@ class User(object):
 
     @property
     def canonical_name(self):
-        return " ".join((self.profile["person"]["last_name"].upper(), self.profile["person"]["first_name"]))
+        return u" ".join((
+            self.profile["person"]["last_name"].upper(),
+            self.profile["person"]["first_name"],
+        ))
 
     @property
     def email(self):
@@ -99,7 +105,8 @@ class User(object):
         return bool(ballot.voters.filter(Voter.person_id == self.id).first())
 
     def can_vote(self, ballot):
-        return self.has_right_to_vote(ballot) and not self.already_voted(ballot)
+        return self.has_right_to_vote(ballot) \
+            and not self.already_voted(ballot)
 
     def can_candidate_signup(self, ballot):
         return self.has_right_to_vote(ballot)
@@ -182,25 +189,40 @@ class Ballot(db.Model):
     ]
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(100), nullable=False, info={'label': u'Název'})
-    description = db.Column(db.UnicodeText, nullable=True, info={'label': u'Popis'})
-    begin_at = db.Column(db.DateTime, nullable=False, info={'label': u'Začátek'})
-    finish_at = db.Column(db.DateTime, nullable=False, info={'label': u'Konec'})
-    approved = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Schváleno'})
-    cancelled = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Zrušeno'})
-    type = db.Column(ChoiceType(TYPES, impl=db.String(20)), nullable=False, info={'label': u'Druh'})
-    unit = db.Column(ChoiceType(UNITS, impl=db.String(20)), nullable=False, info={'label': u'Jednotka', 'form_field_class': SelectField})
-    supporters_too = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Také příznivci'})
-    max_votes = db.Column(db.Integer, default=1, nullable=False, info={'label': u'Max. hlasů'})
+    description = db.Column(db.UnicodeText, nullable=True,
+                            info={'label': u'Popis'})
+    begin_at = db.Column(db.DateTime, nullable=False,
+                         info={'label': u'Začátek'})
+    finish_at = db.Column(db.DateTime, nullable=False,
+                          info={'label': u'Konec'})
+    approved = db.Column(db.Boolean, nullable=False, default=False,
+                         info={'label': u'Schváleno'})
+    cancelled = db.Column(db.Boolean, nullable=False, default=False,
+                          info={'label': u'Zrušeno'})
+    type = db.Column(ChoiceType(TYPES, impl=db.String(20)),
+                     nullable=False, info={'label': u'Druh'})
+    unit = db.Column(
+        ChoiceType(UNITS, impl=db.String(20)), nullable=False,
+        info={'label': u'Jednotka', 'form_field_class': SelectField})
+    supporters_too = db.Column(db.Boolean, nullable=False, default=False,
+                               info={'label': u'Také příznivci'})
+    max_votes = db.Column(db.Integer, default=1, nullable=False,
+                          info={'label': u'Max. hlasů'})
 
     options = db.relationship('BallotOption', backref='ballot',
                               lazy='select', order_by="BallotOption.title")
     voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
     abstainers = db.relationship('Abstainer', backref='ballot', lazy='dynamic',
                                  order_by="Abstainer.hash_digest")
-    protocols = db.relationship('BallotProtocol', backref='ballot',
-                                lazy='dynamic', order_by="desc(BallotProtocol.created_at)")
-    candidate_self_signup = db.Column(db.Boolean, nullable=False, default=True, info={'label': u'Kandidáti se přihlašují sami'})
-    candidate_signup_until = db.Column(db.DateTime, nullable=False, info={'label': u'Přihlášení kandidátů do'})
+    protocols = db.relationship('BallotProtocol',
+                                backref='ballot', lazy='dynamic',
+                                order_by="desc(BallotProtocol.created_at)")
+    candidate_self_signup = db.Column(
+        db.Boolean, nullable=False, default=True,
+        info={'label': u'Kandidáti se přihlašují sami'})
+    candidate_signup_until = db.Column(
+        db.DateTime, nullable=False,
+        info={'label': u'Přihlášení kandidátů do'})
 
     @property
     def in_time_progress(self):
@@ -241,7 +263,7 @@ class Ballot(db.Model):
 
     @property
     def approved_protocol(self):
-        return self.protocols.filter(BallotProtocol.approved == True).first()
+        return self.protocols.filter(BallotProtocol.approved).first()
 
     @property
     def mail_greeting(self):
@@ -305,6 +327,9 @@ class BallotProtocol(db.Model):
     __tablename__ = "ballotprotocol"
     id = db.Column(db.Integer, primary_key=True)
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
-    created_at = db.Column(db.DateTime, default=lambda: datetime.datetime.now())
-    body_html = db.Column(db.UnicodeText, nullable=False, info={'label': u'HTML tělo'})
-    approved = db.Column(db.Boolean, nullable=False, default=False, info={'label': u'Schváleno'})
+    created_at = db.Column(db.DateTime,
+                           default=lambda: datetime.datetime.now())
+    body_html = db.Column(db.UnicodeText, nullable=False,
+                          info={'label': u'HTML tělo'})
+    approved = db.Column(db.Boolean, nullable=False, default=False,
+                         info={'label': u'Schváleno'})

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+
 import json
+
 import requests
-from ballot_box import app, BallotBoxError, mail
 from flask import g, request, render_template
 from flask.ext.mail import Message
+
+from ballot_box import app, BallotBoxError, mail
 
 
 def get_jwt(jwt=None):
@@ -45,7 +48,8 @@ def registry_units():
     return units
 
 
-def send_vote_confirmation(ballot, voter, hash_digest, hash_salt, vote_timestamp, jwt=None):
+def send_vote_confirmation(ballot, voter, hash_digest, hash_salt,
+                           vote_timestamp, jwt=None):
     body = render_template('confirmation_email.txt',
                            ballot=ballot,
                            voter=voter,
@@ -78,17 +82,25 @@ def send_vote_confirmation(ballot, voter, hash_digest, hash_salt, vote_timestamp
         r = requests.post("https://mailer.svobodni.cz/json/send",
                           data=json.dumps(email_dict))
         if r.status_code != requests.codes.ok:
-            raise BallotBoxError("Nepodařilo se odeslat e-mail s potrvzením volby.")
+            raise BallotBoxError(
+                "Nepodařilo se odeslat e-mail s potrvzením volby."
+            )
 
     return body
 
 
 def registry_get_people(members_only=False, region_id=None, jwt=None):
-    r = registry_request("/people.json{0}".format("?region_id={0}".format(region_id) if region_id else ""), jwt=jwt)
+    r = registry_request(
+        "/people.json{0}".format(
+            "?region_id={0}".format(region_id) if region_id else ""
+        ),
+        jwt=jwt,
+    )
     people = []
 
     for p in r.json()["people"]:
-        status_ok = p.get("status", "") in ("regular_member", "regular_supporter")
+        status_ok = p.get("status", "") in \
+            ("regular_member", "regular_supporter")
 
         member_ok = not members_only or \
             p.get("member_status", "") == "regular_member"

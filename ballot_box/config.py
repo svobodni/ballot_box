@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import datetime
 
 
@@ -13,6 +15,7 @@ class Config(object):
     CELERY_BROKER_URL = "redis://localhost:6379/11"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/11"
     SERVER_NAME = "127.0.0.1:5000"
+
 
 class ProductionConfig(Config):
     PREFERRED_URL_SCHEME = "https"
