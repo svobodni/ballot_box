@@ -17,7 +17,7 @@
         {% if ballot.approved_protocol %}
           <br/><a href="{{url_for('protocol_item', protocol_id=ballot.approved_protocol.id)}}" class="btn btn-default"><i class="fa fa-file-text-o"></i> Oficiální volební protokol</a>
         {% else %}
-          Oficiální volební protokol volební komise ještě nevydala.
+          Oficiální volební protokol Volební komise ještě nevydala.
         {% endif %}
       </p>
       <p><button id="show-hashes" class="btn btn-default">Zobrazit kontrolní řetězce</button></p>

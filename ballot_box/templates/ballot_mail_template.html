@@ -4,28 +4,28 @@
   <div class="col-md-12">
     <h3>Vzor pro maily</h3>
     <h4>Podání kandidatury</h4>
+{% if ballot.is_election %}
 <pre>
 {{ballot.name}} — podání kandidatur
 
 Vážení členové{% if ballot.supporters_too %} a příznivci{% endif %} Svobodných{{ballot.mail_greeting}},
 
-do {{ballot.candidate_signup_until|fmt_dt}} probíhá podání kandidatur pro {{ballot.mail_name}}.
+do {{ballot.candidate_signup_until|fmt_dt_range}} probíhá podání kandidatur pro {{ballot.mail_name}}.
 {% if ballot.unit.code.startswith("region") %}Kandidovat mohou pouze členové krajského sdružení.{% elif ballot.unit.code.startswith("country") %}Kandidovat mohou členové{% if ballot.supporters_too %} a příznivci{% endif %} z celé republiky.{% endif %}
-Samotné hlasování pak proběhne v termínu od {{ballot.begin_at|fmt_dt}} do {{ballot.finish_at|fmt_dt}}.
+Samotné hlasování pak proběhne v termínu od {{ballot.begin_at|fmt_dt_range}} do {{ballot.finish_at|fmt_dt_range}}.
 
 Kandidaturu můžete podat ve volebním systému Svobodných: {{url_for('candidate_signup', _external=True)}}
 
 Stanovy strany:
-https://www.svobodni.cz/files/docs/Stanovy-2011.pdf
-Jednací řád volební komise:
-https://www.svobodni.cz/files/docs/jednaci-rad-volebni-komise.pdf
-Informace o volebním systému Svobodných:
-https://www.svobodni.cz/files/docs/Volebni-system-Svobodnych.pdf
+https://files.svobodni.cz/rep/public/stanovy-svobodni.pdf
+Dokumenty Volební komise:
+https://files.svobodni.cz/vk/pro-členy/
 
 S pozdravem,
 {{g.user.name}}
-volební komise
+Volební komise Svobodných
 </pre>
+{% endif %}
     <h4>Zahájení hlasování</h4>
 <pre>
 {{ballot.name}} — zahájení hlasování
@@ -33,22 +33,18 @@ volební komise
 Vážení členové{% if ballot.supporters_too %} a příznivci{% endif %} Svobodných{{ballot.mail_greeting}},
 
 v termínech {{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}} probíhá {{ballot.mail_name}}.
-{% if ballot.options|length <= 1 %}Přihlásil se jediný kandidát {% elif ballot.options|length <= 4 %}Přihlásili se {{ballot.options|length}} kandidáti: {% else %}Přihlásilo se {{ballot.options|length}} kandidátů: {% endif %}{% for option in ballot.options %}{{option.title}}{% if not loop.last %}{% if loop.revindex0 == 1 %} a {% else %}, {% endif %}{% endif %}{% endfor %}.
-{% if ballot.is_yes_no %}Volba probíhá formou PRO NÁVRH / PROTI NÁVRHU.{% else %}{% if ballot.max_votes <= 1 %}Zvolen bude kandidát {% elif ballot.max_votes <= 4%}Zvoleni budou {{ballot.max_votes}} kandidáti {% else %}Zvoleno bude {{ballot.max_votes}} kandidátů {% endif %}s nejvyšším počtem hlasů.{% endif %}
-{% if ballot.unit.code.startswith("region") %}Hlasovat mohou pouze členové krajského sdružení.{% elif ballot.unit.code.startswith("country") %}Hlasovat mohou členové{% if ballot.supporters_too %} a příznivci{% endif %} z celé republiky.{% endif %}
+{% if ballot.is_election and ballot.options %}{% if ballot.options|length == 1 %}Přihlásil se jediný kandidát {% elif ballot.options|length <= 4 %}Přihlásili se {{ballot.options|length}} kandidáti: {% else %}Přihlásilo se {{ballot.options|length}} kandidátů: {% endif %}{% for option in ballot.options %}{{option.title}}{% if not loop.last %}{% if loop.revindex0 == 1 %} a {% else %}, {% endif %}{% endif %}{% endfor %}. {% endif %}{% if ballot.is_yes_no %}{{ballot.type}} probíhá formou PRO NÁVRH / PROTI NÁVRHU.{% else %}{% if ballot.max_votes <= 1 %}Zvolen bude kandidát {% elif ballot.max_votes <= 4%}Zvoleni budou {{ballot.max_votes}} kandidáti {% else %}Zvoleno bude {{ballot.max_votes}} kandidátů {% endif %}s nejvyšším počtem hlasů.{% endif %}
 
-Hlasovat můžete ve volebním systému Svobodných: {{url_for('polling_station', _external=True)}}
+Hlasovat {% if ballot.unit.code.startswith("region") %}mohou pouze členové krajského sdružení{% elif ballot.unit.code.startswith("country") %}mohou členové{% if ballot.supporters_too %} a příznivci{% endif %} z celé republiky{% else %}můžete{% endif %} ve volebním systému Svobodných: {{url_for('polling_station', _external=True)}}
 
 Stanovy strany:
-https://www.svobodni.cz/files/docs/Stanovy-2011.pdf
-Jednací řád volební komise:
-https://www.svobodni.cz/files/docs/jednaci-rad-volebni-komise.pdf
-Informace o volebním systému Svobodných:
-https://www.svobodni.cz/files/docs/Volebni-system-Svobodnych.pdf
+https://files.svobodni.cz/rep/public/stanovy-svobodni.pdf
+Dokumenty Volební komise:
+https://files.svobodni.cz/vk/pro-členy/
 
 S přáním šťastné volby,
 {{g.user.name}}
-volební komise
+Volební komise Svobodných
 </pre>
   </div>
 </div>
