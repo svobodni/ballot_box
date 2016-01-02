@@ -7,6 +7,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/test.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     REGISTRY_URI = "https://registr.svobodni.cz"
     SECRET_KEY = "not a secret"
     LOGIN_TIMEOUT = datetime.timedelta(minutes=30)
