@@ -17,7 +17,7 @@ from flask import render_template, g, request, redirect, \
 from wtforms.validators import ValidationError
 from babel.dates import format_datetime, format_date
 
-from utils import compute_hash_base
+from utils import compute_hash_base, DAYS_RANGE
 from ballot_box import app, db, BallotBoxError, tasks
 from models import Connection, User, Ballot, \
     BallotOption, Vote, Voter, BallotProtocol
@@ -93,6 +93,14 @@ def fmt_dt_filter(dt):
 def fmt_dt_line_filter(dt):
     return Markup("&nbsp;".join(format_datetime(
         dt, format='d. M. yyyy HH:mm', locale='cs_CZ').split(" ")))
+
+
+@app.template_filter('fmt_dt_range')
+def fmt_dt_range_filter(dt):
+    return u"%s %s" % (
+        DAYS_RANGE[dt.weekday()],
+        format_datetime(dt, format='d. M. yyyy HH:mm', locale='cs_CZ'),
+    )
 
 
 @app.template_filter('fmt_d')
@@ -435,7 +443,7 @@ def permit_voting(ballot):
         raise BallotBoxError(u"Tato volba již skončila.", 404)
     if not ballot.approved:
         raise BallotBoxError(
-            u"Tato volba nebyla schválena volební komisí.", 404)
+            u"Tato volba nebyla schválena Volební komisí.", 404)
     if not ballot.in_progress:
         raise BallotBoxError(u"Tato volba nyní neprobíhá.", 404)
 
@@ -643,7 +651,7 @@ def polling_station_result(ballot_id):
         raise BallotBoxError(u"Tato volba ještě probíhá.", 404)
     if not ballot.approved:
         raise BallotBoxError(
-            u"Tato volba nebyla schválena volební komisí.", 404)
+            u"Tato volba nebyla schválena Volební komisí.", 404)
 
     result = ballot_result(ballot)
 
@@ -683,7 +691,7 @@ def candidate_signup_confirm(ballot_id):
     if not ballot.candidate_self_signup:
         raise BallotBoxError(
             u"V této volbě není povoleno přímé podání kandidatury. "
-            u"Kontaktujte prosím vyhlašovatele volby nebo volební komisi.",
+            u"Kontaktujte prosím vyhlašovatele volby nebo Volební komisi.",
             403)
     if ballot.cancelled:
         raise BallotBoxError(u"Tato volba byla zrušena.", 403)
@@ -691,7 +699,7 @@ def candidate_signup_confirm(ballot_id):
         raise BallotBoxError(u"Tato volba již probíhá.", 403)
     if not ballot.approved:
         raise BallotBoxError(
-            u"Tato volba nebyla schválena volební komisí.", 403)
+            u"Tato volba nebyla schválena Volební komisí.", 403)
     if ballot.candidate_signup_until < datetime.datetime.now():
         raise BallotBoxError(
             u"Přihlašovnání do této volby již skončilo.", 403)
