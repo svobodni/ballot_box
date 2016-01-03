@@ -91,12 +91,10 @@ def send_abstainer_confirmation(abstainer_id):
 
 @celery.task()
 def send_abstainer_confirmations(ballot_id, resend_all=False):
-    abstainers = db.session.query(Abstainer).filter(
-        Abstainer.ballot_id == ballot_id
-    )
+    abstainers = db.session.query(Abstainer).filter_by(ballot_id=ballot_id)
 
     if not resend_all:
-        abstainers = abstainers.filter(Abstainer.confirmation_sent is False)
+        abstainers = abstainers.filter_by(confirmation_sent=False)
 
     for a in abstainers.all():
         try:

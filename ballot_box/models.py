@@ -102,7 +102,7 @@ class User(object):
         return self.is_in_unit(unit_type, int(unit_id))
 
     def already_voted(self, ballot):
-        return bool(ballot.voters.filter(Voter.person_id == self.id).first())
+        return bool(ballot.voters.filter_by(person_id=self.id).first())
 
     def can_vote(self, ballot):
         return self.has_right_to_vote(ballot) \
@@ -263,7 +263,7 @@ class Ballot(db.Model):
 
     @property
     def approved_protocol(self):
-        return self.protocols.filter(BallotProtocol.approved).first()
+        return self.protocols.filter_by(approved=True).first()
 
     @property
     def mail_greeting(self):

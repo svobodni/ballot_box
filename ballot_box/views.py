@@ -60,16 +60,13 @@ def login_required(f):
             conn_token = session.get("conn_token", False)
 
             if conn_id and conn_token:
-                conn = db.session.query(Connection).filter(
-                    Connection.id == conn_id
-                ).filter(
-                    Connection.token == conn_token
-                ).filter(
-                    Connection.remote_addr == request.remote_addr
-                ).filter(
-                    Connection.last_click > datetime.datetime.now()
-                    - app.config["LOGIN_TIMEOUT"]
-                ).first()
+                conn = (db.session.query(Connection)
+                                  .filter_by(id=conn_id, token=conn_token,
+                                             remote_addr=request.remote_addr)
+                                  .filter(Connection.last_click
+                                          > datetime.datetime.now()
+                                          - app.config["LOGIN_TIMEOUT"])
+                                  .first())
 
                 if conn is not None:
                     try:
@@ -368,7 +365,7 @@ def ballot_abstainers(ballot_id):
 @login_required
 def protocol_list():
     protocols = (db.session.query(BallotProtocol)
-                           .filter(BallotProtocol.approved)
+                           .filter_by(approved=True)
                            .order_by(BallotProtocol.created_at.desc()))
     return render_template('protocol_list.html', protocols=protocols)
 
@@ -410,9 +407,9 @@ def protocol_item(protocol_id):
 @login_required
 def polling_station():
     ballots = (db.session.query(Ballot)
-               .filter(Ballot.approved)
+               .filter_by(approved=True)
                .filter(Ballot.finish_at >
-                       datetime.datetime.now()-datetime.timedelta(days=60))
+                       datetime.datetime.now() - datetime.timedelta(days=60))
                .order_by(Ballot.begin_at.desc()))
     ballot_groups = {
         "not_voted": [],
@@ -664,10 +661,8 @@ def polling_station_result(ballot_id):
 @login_required
 def candidate_signup():
     ballots = (db.session.query(Ballot)
-               .filter(Ballot.approved)
-               .filter(Ballot.candidate_self_signup)
-               .filter(Ballot.cancelled is False)
-               .filter(Ballot.type == "ELECTION")
+               .filter_by(approved=True, candidate_self_signup=True,
+                          cancelled=False, type="ELECTION")
                .filter(Ballot.begin_at > datetime.datetime.now())
                .order_by(Ballot.begin_at.desc()))
     # Show ballots where the user can sign up first (stored is stable, so it
@@ -707,8 +702,7 @@ def candidate_signup_confirm(ballot_id):
     if request.method == "POST":
         user_id = g.user.id
         db_option = (db.session.query(BallotOption)
-                     .filter(BallotOption.ballot_id == ballot.id)
-                     .filter(BallotOption.user_id == user_id)
+                     .filter_by(ballot_id=ballot.id, user_id=user_id)
                      .first())
         if db_option:
             flash(u"V této volbě již kandidujete.", "danger")

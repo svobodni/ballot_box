@@ -6,7 +6,6 @@ from flask.ext.wtf import Form
 from wtforms import SubmitField, validators
 from wtforms_alchemy import model_form_factory
 from wtforms_components import DateRange
-# Workaround to fix lambdas in DateRange(min)
 from wtforms_components.widgets import BaseDateTimeInput
 
 # The variable db here is a SQLAlchemy object instance from
@@ -14,8 +13,8 @@ from wtforms_components.widgets import BaseDateTimeInput
 from ballot_box import db
 from models import Ballot, BallotProtocol
 
+# Workaround to fix lambdas in DateRange(min)
 BaseDateTimeInput.range_validator_class = int
-
 BaseModelForm = model_form_factory(Form)
 
 
