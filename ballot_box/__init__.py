@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+
+from celery import Celery
 from flask import Flask
+from flask.ext.mail import Mail
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-from werkzeug.contrib.cache import SimpleCache
 from flask_wtf.csrf import CsrfProtect
-from flask.ext.mail import Mail
-from celery import Celery
+from werkzeug.contrib.cache import SimpleCache
 
 
 class BallotBoxError(Exception):
@@ -47,9 +49,11 @@ def make_celery(app):
     celery.Task = ContextTask
     return celery
 
+
 celery = make_celery(app)
-import tasks
+
+import tasks  # NOQA
 
 cache = SimpleCache()
 
-import ballot_box.views
+import ballot_box.views  # NOQA

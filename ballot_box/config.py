@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import datetime
 
 
@@ -5,6 +7,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/test.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     REGISTRY_URI = "https://registr.svobodni.cz"
     SECRET_KEY = "not a secret"
     LOGIN_TIMEOUT = datetime.timedelta(minutes=30)
@@ -13,6 +16,7 @@ class Config(object):
     CELERY_BROKER_URL = "redis://localhost:6379/11"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/11"
     SERVER_NAME = "127.0.0.1:5000"
+
 
 class ProductionConfig(Config):
     PREFERRED_URL_SCHEME = "https"
