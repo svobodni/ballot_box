@@ -203,7 +203,7 @@ def ballot_edit(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress:
+    if ballot.in_progress or ballot.is_finished:
         abort(403)
     form = BallotEditForm(request.form, ballot)
     if form.validate_on_submit():
@@ -224,7 +224,7 @@ def ballot_options(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress:
+    if ballot.in_progress or ballot.is_finished:
         abort(403)
     if request.method == 'POST':
         added = 0
