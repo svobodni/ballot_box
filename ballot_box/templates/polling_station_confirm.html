@@ -14,7 +14,7 @@
   $(document).ready(function() {
     updateHash();
     $("#hash_salt").on("input", updateHash);
-  }); 
+  });
 </script>
 <div class="row">
   <div class="col-md-12">
@@ -27,9 +27,9 @@
           <label>Zvolené možnosti</label>
           <ul>
             {% for option in options_summary %}
-              <li>{{option["title"]}} - {% if option["value"] == 1 %}PRO NÁVRH{% else %}PROTI NÁVRHU{% endif %}</li>
-            {% endfor %}  
-          </ul>  
+              <li>{{option["title"]}} &mdash; {% if option["value"] == 1 %}PRO NÁVRH{% else %}PROTI NÁVRHU{% endif %}</li>
+            {% endfor %}
+          </ul>
         </div>
         <input id="hash_base" class="form-control" type="hidden" name="hash_base" value="{{ hash_base }}"/>
         <div class="form-group">

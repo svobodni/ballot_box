@@ -418,6 +418,8 @@ def polling_station():
         "other": []
     }
     for ballot in ballots:
+        add_missing_option(ballot)
+
         if ballot.is_finished:
             ballot_groups["finished"].append(ballot)
         elif g.user.already_voted(ballot):
@@ -445,6 +447,15 @@ def permit_voting(ballot):
         raise BallotBoxError(u"Tato volba nyní neprobíhá.", 404)
 
 
+def add_missing_option(ballot):
+    if ballot.in_progress and not ballot.options:
+        db_option = BallotOption()
+        db_option.title = ballot.name
+        db_option.ballot = ballot
+        db.session.add(db_option)
+        db.session.commit()
+
+
 @app.route("/polling_station/<int:ballot_id>/")
 @app.route("/volebni_mistnost/<int:ballot_id>/")
 @login_required
@@ -453,6 +464,7 @@ def polling_station_item(ballot_id):
     if ballot is None:
         abort(404)
     permit_voting(ballot)
+    add_missing_option(ballot)
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html',
                                ballot=ballot)
@@ -461,7 +473,7 @@ def polling_station_item(ballot_id):
 
 def validate_options(input_options, ballot):
     allowed_option_ids = set(option.id for option in ballot.options)
-    invalid_options = set(input_options.keys())-allowed_option_ids
+    invalid_options = set(input_options.keys()) - allowed_option_ids
     if len(invalid_options) > 0:
         raise ValidationError(u"Možnost/i ID {} jsou neplatné."
                               .format(", ".join(invalid_options)))
