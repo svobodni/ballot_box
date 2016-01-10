@@ -210,6 +210,13 @@ def ballot_edit(ballot_id):
         form.populate_obj(ballot)
         ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
+
+        if ballot.approved and ballot.type == "VOTING" and not ballot.options:
+            db_option = BallotOption()
+            db_option.title = ballot.name
+            db_option.ballot = ballot
+            db.session.add(db_option)
+
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně změněno.", "success")
         return redirect(url_for("ballot_list"))
@@ -418,8 +425,6 @@ def polling_station():
         "other": []
     }
     for ballot in ballots:
-        add_missing_option(ballot)
-
         if ballot.is_finished:
             ballot_groups["finished"].append(ballot)
         elif g.user.already_voted(ballot):
@@ -447,15 +452,6 @@ def permit_voting(ballot):
         raise BallotBoxError(u"Tato volba nyní neprobíhá.", 404)
 
 
-def add_missing_option(ballot):
-    if ballot.in_progress and not ballot.options:
-        db_option = BallotOption()
-        db_option.title = ballot.name
-        db_option.ballot = ballot
-        db.session.add(db_option)
-        db.session.commit()
-
-
 @app.route("/polling_station/<int:ballot_id>/")
 @app.route("/volebni_mistnost/<int:ballot_id>/")
 @login_required
@@ -464,7 +460,6 @@ def polling_station_item(ballot_id):
     if ballot is None:
         abort(404)
     permit_voting(ballot)
-    add_missing_option(ballot)
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html',
                                ballot=ballot)
