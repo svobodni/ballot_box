@@ -240,7 +240,7 @@ class Ballot(db.Model):
 
     @property
     def is_finished(self):
-        return self.in_time_finished
+        return self.approved and not self.cancelled and self.in_time_finished
 
     @property
     def in_time_candidate_signup(self):

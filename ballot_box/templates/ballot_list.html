@@ -43,7 +43,7 @@
             <td>
               {% if ballot.approved %}
                 {% if ballot.in_time_finished and not ballot.approved_protocol %}
-                  <span class="label label-warning">Není protokol</span>  
+                  <span class="label label-warning">Není protokol</span>
                 {% elif ballot.in_time_finished and ballot.approved_protocol %}
                   <span class="label label-success">Hotovo</span>
                 {% elif ballot.in_time_progress %}
@@ -60,7 +60,7 @@
               {% endif %}
             </td>
             <td>
-              {% if not ballot.in_time_progress and not ballot.in_time_finished %}
+              {% if not ballot.in_progress and not ballot.is_finished %}
                 {% if g.user.can_edit_ballot %}
                   <a href="{{url_for('ballot_edit', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
                 {% endif %}
@@ -74,7 +74,7 @@
                 <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-list-ol"></i> Výsledek</a>
                 {% if g.user.can_edit_ballot %}
                   <a href="{{url_for('ballot_protocol_list', ballot_id=ballot.id)}}" class="btn btn-xs btn-default"><i class="fa fa-file-text-o"></i> Protokol</a>
-                {% endif %}  
+                {% endif %}
               {% endif %}
               {% if not ballot.in_time_finished %}
                 <a href="{{url_for('ballot_mail_template', ballot_id=ballot.id)}}" class="btn btn-default btn-xs" title="Vzor mailu"><i class="fa fa-envelope"></i></a>

@@ -203,13 +203,20 @@ def ballot_edit(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress:
+    if ballot.in_progress or ballot.is_finished:
         abort(403)
     form = BallotEditForm(request.form, ballot)
     if form.validate_on_submit():
         form.populate_obj(ballot)
         ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
+
+        if ballot.approved and ballot.type == "VOTING" and not ballot.options:
+            db_option = BallotOption()
+            db_option.title = ballot.name
+            db_option.ballot = ballot
+            db.session.add(db_option)
+
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně změněno.", "success")
         return redirect(url_for("ballot_list"))
@@ -224,7 +231,7 @@ def ballot_options(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    if ballot.in_time_progress:
+    if ballot.in_progress or ballot.is_finished:
         abort(403)
     if request.method == 'POST':
         added = 0
@@ -461,7 +468,7 @@ def polling_station_item(ballot_id):
 
 def validate_options(input_options, ballot):
     allowed_option_ids = set(option.id for option in ballot.options)
-    invalid_options = set(input_options.keys())-allowed_option_ids
+    invalid_options = set(input_options.keys()) - allowed_option_ids
     if len(invalid_options) > 0:
         raise ValidationError(u"Možnost/i ID {} jsou neplatné."
                               .format(", ".join(invalid_options)))
