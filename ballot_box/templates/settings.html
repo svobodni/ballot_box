@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Nastavení uživatele</h3>
+    {{ wtf.quick_form(form, form_type="horizontal", button_map={"submit":"primary"}) }}
+  </div>
+</div>
+{% endblock %}

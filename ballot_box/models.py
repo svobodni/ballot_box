@@ -208,7 +208,6 @@ class Ballot(db.Model):
                                info={'label': u'Také příznivci'})
     max_votes = db.Column(db.Integer, default=1, nullable=False,
                           info={'label': u'Max. hlasů'})
-
     options = db.relationship('BallotOption', backref='ballot',
                               lazy='select', order_by="BallotOption.title")
     voters = db.relationship('Voter', backref='ballot', lazy='dynamic')
@@ -282,7 +281,7 @@ class BallotOption(db.Model):
     __tablename__ = "ballot_option"
     id = db.Column(db.Integer, primary_key=True)
     ballot_id = db.Column(db.Integer, db.ForeignKey('ballot.id'))
-    title = db.Column(db.Unicode(100))
+    title = db.Column(db.Unicode(500))
     user_id = db.Column(db.Integer, nullable=True)
     votes = db.relationship('Vote', backref='ballot_option',
                             lazy='dynamic', order_by="Vote.hash_digest")
@@ -333,3 +332,10 @@ class BallotProtocol(db.Model):
                           info={'label': u'HTML tělo'})
     approved = db.Column(db.Boolean, nullable=False, default=False,
                          info={'label': u'Schváleno'})
+
+
+class Settings(db.Model):
+    __tablename__ = "settings"
+    id = db.Column(db.Integer, primary_key=True)
+    signature = db.Column(db.UnicodeText, nullable=True,
+                          info={'label': u'Podpis'})

@@ -11,7 +11,7 @@ from wtforms_components.widgets import BaseDateTimeInput
 # The variable db here is a SQLAlchemy object instance from
 # Flask-SQLAlchemy package
 from ballot_box import db
-from models import Ballot, BallotProtocol
+from models import Ballot, BallotProtocol, Settings
 
 # Workaround to fix lambdas in DateRange(min)
 BaseDateTimeInput.range_validator_class = int
@@ -166,3 +166,10 @@ class BallotProtocolEditForm(ModelForm):
         model = BallotProtocol
         only = ["body_html", "approved"]
 BallotProtocolEditForm.submit = SubmitField(u'Uložit')
+
+
+class SettingsForm(ModelForm):
+    class Meta:
+        model = Settings
+        only = ["signature"]
+SettingsForm.submit = SubmitField(u'Uložit')

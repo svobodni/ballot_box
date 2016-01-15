@@ -26,7 +26,12 @@
       <div class="col-md-8 col-wb">
         <p class="text-right">
           {% if g.user %}
-            Přihlášen {{g.user.name}}            
+            Přihlášen
+            {% if g.user.can_create_ballot() %}
+              <a href="{{ url_for('settings') }}">{{g.user.name}}</a>
+            {% else %}
+              {{g.user.name}}
+            {% endif %}
           {% endif %}
         </p>
       </div>

@@ -20,9 +20,9 @@ from babel.dates import format_datetime, format_date
 from utils import compute_hash_base, DAYS_RANGE
 from ballot_box import app, db, BallotBoxError, tasks
 from models import Connection, User, Ballot, \
-    BallotOption, Vote, Voter, BallotProtocol
+    BallotOption, Vote, Voter, BallotProtocol, Settings
 from forms import BallotForm, BallotEditForm, \
-    BallotProtocolForm, BallotProtocolEditForm
+    BallotProtocolForm, BallotProtocolEditForm, SettingsForm
 from registry import registry_request, send_vote_confirmation, get_jwt
 
 
@@ -331,10 +331,20 @@ def ballot_protocol_new(ballot_id):
 def ballot_mail_template(ballot_id):
     if not g.user.can_edit_ballot():
         abort(403)
+
     ballot = db.session.query(Ballot).get(ballot_id)
+
     if ballot is None:
         abort(404)
-    return render_template('ballot_mail_template.html', ballot=ballot)
+
+    settings = db.session.query(Settings).get(g.user.id)
+
+    signature = generate_signature() \
+        if settings is None \
+        else settings.signature
+
+    return render_template('ballot_mail_template.html',
+                           ballot=ballot, signature=signature)
 
 
 @app.route("/ballot/<int:ballot_id>/abstainers/", methods=('GET', 'POST'))
@@ -723,3 +733,34 @@ def candidate_signup_confirm(ballot_id):
             flash(u"Kandidatura úspěšně podána.", "success")
             return redirect(url_for('candidate_signup'))
     return render_template('candidate_signup_confirm.html', ballot=ballot)
+
+
+def generate_signature():
+    return u'\n'.join([
+        u'S pozdravem,',
+        g.user.name,
+        u'Volební komise Svobodných',
+    ])
+
+
+@app.route("/nastaveni/", methods=('GET', 'POST'))
+@login_required
+def settings():
+    if not g.user.can_create_ballot():
+        abort(403)
+
+    settings = db.session.query(Settings).get(g.user.id)
+
+    if settings is None:
+        settings = Settings(id=g.user.id, signature=generate_signature())
+
+    form = SettingsForm(request.form, settings)
+
+    if request.method == "POST" and form.validate_on_submit():
+        form.populate_obj(settings)
+        db.session.add(settings)
+        db.session.commit()
+        flash(u"Nastavení bylo uloženo.", "success")
+        return redirect(url_for("settings"))
+
+    return render_template('settings.html', form=form)

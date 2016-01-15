@@ -3,8 +3,8 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Vzor pro maily</h3>
-    <h4>Podání kandidatury</h4>
 {% if ballot.is_election %}
+    <h4>Podání kandidatury</h4>
 <pre>
 {{ballot.name}} — podání kandidatur
 
@@ -21,9 +21,7 @@ https://files.svobodni.cz/rep/public/stanovy-svobodni.pdf
 Dokumenty Volební komise:
 https://files.svobodni.cz/vk/pro-členy/
 
-S pozdravem,
-{{g.user.name}}
-Volební komise Svobodných
+{{signature}}
 </pre>
 {% endif %}
     <h4>Zahájení hlasování</h4>
@@ -42,9 +40,7 @@ https://files.svobodni.cz/rep/public/stanovy-svobodni.pdf
 Dokumenty Volební komise:
 https://files.svobodni.cz/vk/pro-členy/
 
-S přáním šťastné volby,
-{{g.user.name}}
-Volební komise Svobodných
+{{signature}}
 </pre>
   </div>
 </div>
