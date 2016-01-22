@@ -220,9 +220,12 @@ class Ballot(db.Model):
     candidate_self_signup = db.Column(
         db.Boolean, nullable=False, default=True,
         info={'label': u'Kandidáti se přihlašují sami'})
+    candidate_signup_from = db.Column(
+        db.DateTime, nullable=False,
+        info={'label': u'Přihlašování kandidátů od'})
     candidate_signup_until = db.Column(
         db.DateTime, nullable=False,
-        info={'label': u'Přihlášení kandidátů do'})
+        info={'label': u'Přihlašování kandidátů do'})
 
     @property
     def in_time_progress(self):
@@ -245,7 +248,8 @@ class Ballot(db.Model):
     @property
     def in_time_candidate_signup(self):
         now = datetime.datetime.now()
-        return self.candidate_signup_until > now
+        return self.candidate_self_signup and \
+            self.candidate_signup_until > now >= self.candidate_signup_from
 
     @property
     def is_election(self):

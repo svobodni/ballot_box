@@ -1,9 +1,9 @@
 {% macro ballot_details(ballot) -%}
   <p>
     Typ: {{ballot.type}} &nbsp;&nbsp; Vyhodnocení: {{ballot.method}}<br/>
-    Termín: {{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}}<br/>
+    Termín: od {{ballot.begin_at|fmt_dt_range}} do {{ballot.finish_at|fmt_dt_range}}<br/>
     {% if ballot.candidate_self_signup %}
-      Přihlášení kandidátů do: {{ballot.candidate_signup_until|fmt_dt}}<br/>
+      Přihlašování kandidátů: od {{ballot.candidate_signup_from|fmt_dt_range}} do {{ballot.candidate_signup_until|fmt_dt_range}}<br/>
     {% endif %}
     Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
     Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}

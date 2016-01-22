@@ -268,7 +268,7 @@ def ballot_options(ballot_id):
             db.session.add(db_option)
             added += 1
         db.session.commit()
-        flash(u"Úspěšně přidáno {}, obebráno {}, nezměněno {}"
+        flash(u"Úspěšně přidáno {}, odebráno {}, nezměněno {}"
               .format(added, removed, unchanged), "success")
         return redirect(url_for("ballot_list"))
     return render_template('ballot_options.html', ballot=ballot)
@@ -514,7 +514,7 @@ def polling_station_confirm(ballot_id):
         flash(unicode(e), "danger")
         return redirect(url_for('polling_station_item', ballot_id=ballot_id))
     except ValueError as e:
-        flash(u"Některý z hlasů má neplatnou hodnotu", "danger")
+        flash(u"Některý z hlasů nemá platnou hodnotu", "danger")
         return redirect(url_for('polling_station_item', ballot_id=ballot_id))
 
     title_dict = {option.id: option.title for option in ballot.options}
@@ -702,9 +702,9 @@ def candidate_signup_confirm(ballot_id):
     if not ballot.approved:
         raise BallotBoxError(
             u"Tato volba nebyla schválena Volební komisí.", 403)
-    if ballot.candidate_signup_until < datetime.datetime.now():
+    if not ballot.in_time_candidate_signup:
         raise BallotBoxError(
-            u"Přihlašovnání do této volby již skončilo.", 403)
+            u"Přihlašování do této volby již skončilo.", 403)
 
     if request.method == "POST":
         user_id = g.user.id
