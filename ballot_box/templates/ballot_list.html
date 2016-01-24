@@ -39,8 +39,7 @@
             <td>
               {% if ballot.candidate_self_signup %}
                 <div title="Přihlašování kandidátů">
-                  ({{ballot.candidate_signup_from|fmt_dt_line}}&ndash;<br/>
-                  {{ballot.candidate_signup_until|fmt_dt_line}})
+                  ({% if ballot.candidate_signup_from %}{{ballot.candidate_signup_from|fmt_dt_line}}&ndash;<br/>{% endif %}{{ballot.candidate_signup_until|fmt_dt_line}})
                 </div>
               {% endif %}
               od&nbsp;{{ballot.begin_at|fmt_dt_line}}<br/>

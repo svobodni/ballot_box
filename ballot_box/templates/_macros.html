@@ -3,7 +3,9 @@
     Typ: {{ballot.type}} &nbsp;&nbsp; Vyhodnocení: {{ballot.method}}<br/>
     Termín: od {{ballot.begin_at|fmt_dt_range}} do {{ballot.finish_at|fmt_dt_range}}<br/>
     {% if ballot.candidate_self_signup %}
-      Přihlašování kandidátů: od {{ballot.candidate_signup_from|fmt_dt_range}} do {{ballot.candidate_signup_until|fmt_dt_range}}<br/>
+      Přihlašování kandidátů:
+        {% if ballot.candidate_signup_from %}od {{ballot.candidate_signup_from|fmt_dt_range}}{% endif %}
+        do {{ballot.candidate_signup_until|fmt_dt_range}}<br/>
     {% endif %}
     Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
     Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}

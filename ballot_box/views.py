@@ -218,7 +218,8 @@ def ballot_edit(ballot_id):
             db.session.add(db_option)
 
         db.session.commit()
-        flash(u"Volba/hlasování bylo úspěšně změněno.", "success")
+        flash(u"Hlasování bylo úspěšně změněno." if ballot.type == "VOTING"
+              else u"Volba byla úspěšně změněna.", "success")
         return redirect(url_for("ballot_list"))
     return render_template('ballot_edit.html', form=form)
 
@@ -667,10 +668,13 @@ def polling_station_result(ballot_id):
 @app.route("/podani_kandidatury/")
 @login_required
 def candidate_signup():
+    now = datetime.datetime.now()
     ballots = (db.session.query(Ballot)
                .filter_by(approved=True, candidate_self_signup=True,
                           cancelled=False, type="ELECTION")
-               .filter(Ballot.begin_at > datetime.datetime.now())
+               .filter((Ballot.candidate_signup_from.is_(None) |
+                       (Ballot.candidate_signup_from <= now)) &
+                       (Ballot.candidate_signup_until > now))
                .order_by(Ballot.begin_at.desc()))
     # Show ballots where the user can sign up first (stored is stable, so it
     # keeps the time ordering)

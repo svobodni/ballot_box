@@ -100,7 +100,6 @@ class BallotForm(ModelForm):
             },
             "candidate_signup_from": {
                 "validators": [validators.Optional()],
-                "default": datetime.datetime.now,
             },
             "candidate_signup_until": {
                 "validators": [
@@ -156,7 +155,6 @@ class BallotEditForm(ModelForm):
             },
             "candidate_signup_from": {
                 "validators": [validators.Optional()],
-                "default": datetime.datetime.now,
             },
             "candidate_signup_until": {
                 "validators": [validators.Optional()],

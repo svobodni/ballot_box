@@ -46,7 +46,7 @@ $(document).ready(function() {
                         html += '<br/>'
                     }
                     if(data.person.cv_url) {
-                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';   
+                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
                 } catch (e) {
                     console.log("Chyba pri zobrazovani kontaktu.");
@@ -65,4 +65,15 @@ $(document).ready(function() {
     if($('.bo-profile').length>0) {
         $('.bo-profile-empty').html('<i class="fa fa-user fa-3x"></i>');
     }
+    $('input#candidate_self_signup').on('click', function() {
+        var input = $(this);
+        var signups = input.closest('.form-group').nextAll('.form-group:lt(2)');
+
+        if (input.attr('checked')) {
+            signups.fadeIn();
+        } else {
+            signups.fadeOut();
+        }
+    });
+    $('input#candidate_self_signup').triggerHandler('click');
 });
