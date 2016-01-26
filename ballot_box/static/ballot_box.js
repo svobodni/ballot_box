@@ -46,12 +46,12 @@ $(document).ready(function() {
                         html += '<br/>'
                     }
                     if(data.person.cv_url) {
-                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';   
+                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
                 } catch (e) {
-                    console.log("Chyba pri zobrazovani kontaktu.");
-                    console.log(e);
-                    console.log(data);
+                    console.error("Chyba při zobrazování kontaktu.");
+                    console.error(e);
+                    console.error(data);
                 }
                 html += "</div>"
                 $this.html(html);
@@ -65,4 +65,10 @@ $(document).ready(function() {
     if($('.bo-profile').length>0) {
         $('.bo-profile-empty').html('<i class="fa fa-user fa-3x"></i>');
     }
+
+    $('.send-announcement').on('click', function(e) {
+        if (!confirm('Opravdu chcete rozeslat výsledek volby e-mailem?')) {
+            e.preventDefault();
+        }
+    });
 });

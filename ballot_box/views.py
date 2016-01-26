@@ -12,13 +12,14 @@ from collections import defaultdict
 from base64 import b64encode, b64decode
 
 import bleach
+from flask.ext.mail import Message
 from flask import render_template, g, request, redirect, \
     url_for, session, abort, flash, Markup
 from wtforms.validators import ValidationError
 from babel.dates import format_datetime, format_date
 
 from utils import compute_hash_base, DAYS_RANGE
-from ballot_box import app, db, BallotBoxError, tasks
+from ballot_box import app, db, mail, tasks, BallotBoxError
 from models import Connection, User, Ballot, \
     BallotOption, Vote, Voter, BallotProtocol
 from forms import BallotForm, BallotEditForm, \
@@ -723,3 +724,32 @@ def candidate_signup_confirm(ballot_id):
             flash(u"Kandidatura úspěšně podána.", "success")
             return redirect(url_for('candidate_signup'))
     return render_template('candidate_signup_confirm.html', ballot=ballot)
+
+
+@app.route("/result_announcement/<int:protocol_id>/")
+@app.route("/ohlaseni_vysledku_volby/<int:protocol_id>/")
+@login_required
+def send_announcement(protocol_id):
+    if not g.user.can_create_ballot():
+        abort(403)
+
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+
+    if protocol is None:
+        abort(404)
+
+    if app.config["USE_SMTP"]:
+        ballot_type = u"volby" if protocol.ballot.type == "ELECTION" \
+                      else u"hlasování"
+        msg = Message(u"Oznámení výsledku {0}".format(ballot_type),
+                      sender=(u"Volební komise", "vk@svobodni.cz"),
+                      recipients=["kancelar@svobodni.cz", "kk@svobodni.cz"])
+        msg.body = render_template('protocol_announcement.txt',
+                                   protocol=protocol)
+        mail.send(msg)
+        flash(u"Výsledek volby oznámen.", "success")
+    else:
+        flash(u"Oznámení nebylo odesláno.", "danger")
+
+    return redirect(url_for("ballot_protocol_list",
+                            ballot_id=protocol.ballot_id))

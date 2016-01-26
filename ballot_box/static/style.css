@@ -32,3 +32,7 @@ textarea#description {
 .protocol dd {
     margin-left: 165px;
 }
+
+.alert {
+    margin-top: 20px
+}
