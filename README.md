@@ -11,5 +11,5 @@ python runserver.py
 ```
 pip install flake8
 
-flake8 --exclude=venv ballot_box
+flake8
 ```
