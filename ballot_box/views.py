@@ -743,6 +743,7 @@ def generate_signature():
     ])
 
 
+@app.route("/settings/", methods=('GET', 'POST'))
 @app.route("/nastaveni/", methods=('GET', 'POST'))
 @login_required
 def settings():
