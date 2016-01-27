@@ -12,7 +12,7 @@ from celery.utils.log import get_task_logger
 
 from ballot_box import celery, db, mail, app
 from ballot_box.models import Ballot, Abstainer
-from ballot_box.registry import registry_get_people
+from ballot_box.registry import get_people
 from ballot_box.utils import compute_hash_base
 
 logger = get_task_logger(__name__)
@@ -21,16 +21,7 @@ logger = get_task_logger(__name__)
 @celery.task()
 def add_abstainers(ballot_id, jwt):
     ballot = db.session.query(Ballot).get(ballot_id)
-    (unit_type, unit_id) = tuple(ballot.unit.code.split(','))
-    region_id = None
-    if unit_type == "region":
-        region_id = int(unit_id)
-    elif unit_type != "country":
-        # don't support other type of units
-        return
-    right_to_vote = registry_get_people(
-        not ballot.supporters_too,
-        region_id, jwt=jwt)
+    right_to_vote = get_people(ballot, jwt)
     voter_ids = set(v.person_id for v in ballot.voters)
     abstainers = [p for p in right_to_vote if p["id"] not in voter_ids]
 
