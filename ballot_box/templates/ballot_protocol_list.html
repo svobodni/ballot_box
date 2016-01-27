@@ -19,6 +19,7 @@
             </td>
             <td>
               <a href="{{url_for('ballot_protocol_edit', protocol_id=protocol.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
+              <a href="{{url_for('protocol_export', protocol_id=protocol.id)}}" class="btn btn-default btn-xs" title="Exportovat do PDF"><i class="fa fa-file-pdf-o"></i></a>
             </td>
           </tr>
         {% endfor %}
