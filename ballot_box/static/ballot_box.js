@@ -46,7 +46,7 @@ $(document).ready(function() {
                         html += '<br/>'
                     }
                     if(data.person.cv_url) {
-                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';   
+                        html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
                 } catch (e) {
                     console.log("Chyba pri zobrazovani kontaktu.");
@@ -65,4 +65,9 @@ $(document).ready(function() {
     if($('.bo-profile').length>0) {
         $('.bo-profile-empty').html('<i class="fa fa-user fa-3x"></i>');
     }
+    $.datetimepicker.setLocale('cs');
+    $('input[type=datetime]').datetimepicker({
+        format: 'Y-m-d H:i:s',
+        dayOfWeekStart: 1
+    });
 });
