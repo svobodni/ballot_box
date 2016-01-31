@@ -11,10 +11,11 @@ from functools import wraps
 from collections import defaultdict
 from base64 import b64encode, b64decode
 
+import pdfkit
 import bleach
 from flask.ext.mail import Message
 from flask import render_template, g, request, redirect, \
-    url_for, session, abort, flash, Markup
+    url_for, session, abort, flash, make_response, Markup
 from wtforms.validators import ValidationError
 from babel.dates import format_datetime, format_date
 
@@ -408,6 +409,34 @@ def protocol_item(protocol_id):
     if not g.user.can_edit_ballot() and not protocol.approved:
         raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
     return render_template('protocol_item.html', protocol=protocol)
+
+
+@app.route("/protocol/<int:protocol_id>/export")
+@app.route("/protokol/<int:protocol_id>/export")
+@login_required
+def protocol_export(protocol_id):
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+
+    if protocol is None:
+        abort(404)
+
+    if not g.user.can_edit_ballot() and not protocol.approved:
+        raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
+
+    body = render_template("protocol_export.html", protocol=protocol)
+
+    options = {
+        "encoding": "UTF-8",
+        "page-size": "A4",
+        "margin-top": "2cm",
+        "margin-left": "2cm",
+        "margin-bottom": "2cm",
+        "margin-right": "2cm",
+    }
+
+    response = make_response(pdfkit.from_string(body, False, options=options))
+    response.mimetype = "application/pdf"
+    return response
 
 
 @app.route("/polling_station/")
