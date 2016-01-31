@@ -84,7 +84,6 @@ def send_abstainer_confirmation(abstainer_id):
         # Only SMTP supported here
         logger.warning(u"Not sending abstainer confirmation {0} {1}"
                        .format(abstainer.name, abstainer.email))
-        pass
 
     abstainer.confirmation_sent = True
 
