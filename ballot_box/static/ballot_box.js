@@ -49,9 +49,9 @@ $(document).ready(function() {
                         html += '<a href="'+data.person.cv_url+'"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
                 } catch (e) {
-                    console.log("Chyba pri zobrazovani kontaktu.");
-                    console.log(e);
-                    console.log(data);
+                    console.error("Chyba při zobrazování kontaktu.");
+                    console.error(e);
+                    console.error(data);
                 }
                 html += "</div>"
                 $this.html(html);
@@ -69,5 +69,11 @@ $(document).ready(function() {
     $('input[type=datetime]').datetimepicker({
         format: 'Y-m-d H:i:s',
         dayOfWeekStart: 1
+    });
+
+    $('.send-announcement').on('click', function(e) {
+        if (!confirm('Opravdu chcete rozeslat výsledek volby e-mailem?')) {
+            e.preventDefault();
+        }
     });
 });
