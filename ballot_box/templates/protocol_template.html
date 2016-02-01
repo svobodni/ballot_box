@@ -61,7 +61,18 @@
 <p>Během {%if ballot.is_election %}voleb{% else %}hlasování{% endif %} ani 12&nbsp;hodin po&nbsp;jejich ukončení se na&nbsp;Volební komisi neobrátil nikdo, kdo by zpochybnil správnost průběhu a&nbsp;důvěryhodnost výsledku.
 <p>{%if ballot.is_election %}Volby proběhly{% else %}Hlasování proběhlo{% endif %} řádně a&nbsp;nebyly shledány žádné okolnosti, které by zpochybnily jejich průběh a&nbsp;důvěryhodnost.</p>
 <p>
-  {% if elected|length <= 1 %}Byl {%if ballot.is_election %}zvolen{% else %}schválen{% endif %} {% else %}Byli zvoleni: {% endif %}{% for option in elected %}<strong>{{option["title"]}}</strong>{% if not loop.last %}{% if loop.revindex0 == 1 %} a&nbsp;{% else %}, {% endif %}{% endif %}{% endfor %}.
+  {% if ballot.is_election %}
+    {% if elected|length > 0 %}
+      {% if elected|length == 1 %}Byl zvolen{% else %}Byli zvoleni:{% endif %}
+      {% for option in elected %}<strong>{{option["title"]}}</strong>{% if not loop.last %}{% if loop.revindex0 == 1 %} a&nbsp;{% else %}, {% endif %}{% endif %}{% endfor %}.
+    {% else %}
+      Nikdo nebyl zvolen.
+    {% endif %}
+  {% else %}
+    {% for option in result %}
+      Návrh {{option["title"]}} <strong>{% if not option["elected"] %}ne{% endif %}byl schválen</strong>.
+    {% endfor %}
+  {% endif %}
 </p>
 {%- if not ballot.is_yes_no and elected|length < ballot.max_votes %}
 <p>
