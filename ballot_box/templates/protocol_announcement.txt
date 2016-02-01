@@ -1,0 +1,8 @@
+Dobrý den,
+
+ke skončené{% if protocol.ballot.type == "ELECTION" %} volbě{% else %}mu hlasovaní{% endif %} jsme vystavili nový protokol.
+
+Název: {{protocol.ballot.name}}
+Adresa: {{url_for('protocol_item', protocol_id=protocol.id, _external=True)}}
+
+Vaše Volební komise
