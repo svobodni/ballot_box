@@ -59,7 +59,7 @@ try:
 except OSError:
     pass
 
-cache = FileSystemCache(app.config['CACHE_DIR'])
+cache = FileSystemCache(app.config['CACHE_DIR'])  # default_timeout=300
 
 import tasks  # NOQA
 import ballot_box.views  # NOQA
