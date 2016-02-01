@@ -173,16 +173,9 @@ def login(redirect_after=None):
 
 @app.route("/logout/")
 def logout():
-    if g.get("user") is None:
-        conn_id = session.get("conn_id", False)
-        conn_token = session.get("conn_token", False)
-
-        if conn_id and conn_token:
-            db.session.query(Connection).filter_by(
-                id=conn_id, token=conn_token).delete()
-            db.session.commit()
-
-    return redirect("https://registr.svobodni.cz/people/sign_out")
+    response = redirect("https://registr.svobodni.cz/people/sign_out")
+    response.set_cookie("session", expires=0)  # invalidate the session
+    return response
 
 
 @app.route("/ballot/")
