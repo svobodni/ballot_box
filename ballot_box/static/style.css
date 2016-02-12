@@ -36,3 +36,7 @@ textarea#description {
 .container-fluid > .row {
     margin: inherit;
 }
+
+.alert {
+    margin-top: 20px
+}

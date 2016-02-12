@@ -1,11 +1,14 @@
-from ballot_box import app, db
+# -*- coding: utf-8 -*-
+
+import datetime
 import unittest
+
+from ballot_box import app, db
 from ballot_box.models import Ballot, BallotOption, Vote
 from ballot_box.views import ballot_result
-import datetime
+
 
 class BallotBoxTestCase(unittest.TestCase):
-
     def setUp(self):
         app.config.from_object('ballot_box.config.TestingConfig')
         db.session.close()
@@ -39,7 +42,8 @@ class BallotBoxTestCase(unittest.TestCase):
             db.session.add(bo)
             options.append(bo)
         db.session.commit()
-        self.assertEqual(db.session.query(BallotOption).count(), pre_count+count)
+        self.assertEqual(db.session.query(BallotOption).count(),
+                         pre_count + count)
 
         return options
 
@@ -70,14 +74,14 @@ class BallotBoxTestCase(unittest.TestCase):
     def test_ballot_result1(self):
         ballot = self.create_ballot(1)
         ops = self.create_options(ballot, 5)
-        
+
         # 0 0 0 0 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
         # 1 0 0 0 0
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
-        
+
         self.add_votes(ops[1], 1)
         # 1 1 0 0 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
@@ -89,7 +93,7 @@ class BallotBoxTestCase(unittest.TestCase):
         self.add_votes(ops[0], 1)
         # 2 1 1 0 0
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
-        
+
         self.add_votes(ops[1], 1)
         # 2 2 1 0 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
@@ -101,14 +105,14 @@ class BallotBoxTestCase(unittest.TestCase):
     def test_ballot_result2(self):
         ballot = self.create_ballot(2)
         ops = self.create_options(ballot, 5)
-        
+
         # 0 0 0 0 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
         # 1 0 0 0 0
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
-        
+
         self.add_votes(ops[1], 1)
         # 1 1 0 0 0
         self.assertEqual(2, self.elected_count(ballot_result(ballot)))
@@ -120,7 +124,7 @@ class BallotBoxTestCase(unittest.TestCase):
         self.add_votes(ops[0], 1)
         # 2 1 1 0 0
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
-        
+
         self.add_votes(ops[1], 1)
         # 2 2 1 0 0
         self.assertEqual(2, self.elected_count(ballot_result(ballot)))
@@ -132,20 +136,20 @@ class BallotBoxTestCase(unittest.TestCase):
     def test_ballot_result1_yn(self):
         ballot = self.create_ballot(1)
         ops = self.create_options(ballot, 1)
-        
+
         # 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
-        # 1 
+        # 1
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1, -1)
-        # 0 
+        # 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1, -1)
-        # -1 
+        # -1
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
@@ -157,20 +161,20 @@ class BallotBoxTestCase(unittest.TestCase):
     def test_ballot_result2_yn1(self):
         ballot = self.create_ballot(2)
         ops = self.create_options(ballot, 1)
-        
+
         # 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
-        # 1 
+        # 1
         self.assertEqual(1, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1, -1)
-        # 0 
+        # 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1, -1)
-        # -1 
+        # -1
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
         self.add_votes(ops[0], 1)
@@ -182,7 +186,7 @@ class BallotBoxTestCase(unittest.TestCase):
     def test_ballot_result2_yn2(self):
         ballot = self.create_ballot(2)
         ops = self.create_options(ballot, 2)
-        
+
         # 0 0
         self.assertEqual(0, self.elected_count(ballot_result(ballot)))
 
@@ -207,8 +211,7 @@ class BallotBoxTestCase(unittest.TestCase):
         self.add_votes(ops[1], 1)
         # 2 1
         self.assertEqual(2, self.elected_count(ballot_result(ballot)))
-        
+
 
 if __name__ == '__main__':
     unittest.main()
-
