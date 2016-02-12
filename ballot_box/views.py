@@ -341,7 +341,7 @@ def ballot_mail_template(ballot_id):
 
     settings = db.session.query(Settings).get(g.user.id)
 
-    signature = generate_signature() \
+    signature = default_signature() \
         if settings is None \
         else settings.signature
 
@@ -794,7 +794,7 @@ def send_announcement(protocol_id):
                             ballot_id=protocol.ballot_id))
 
 
-def generate_signature():
+def default_signature():
     return u'\n'.join([
         u'S pozdravem,',
         g.user.name,
@@ -812,7 +812,7 @@ def settings():
     settings = db.session.query(Settings).get(g.user.id)
 
     if settings is None:
-        settings = Settings(id=g.user.id, signature=generate_signature())
+        settings = Settings(id=g.user.id, signature=default_signature())
 
     form = SettingsForm(request.form, settings)
 
