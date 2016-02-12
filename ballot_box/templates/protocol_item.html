@@ -6,6 +6,10 @@
 <div class="panel panel-default">
   <div class="panel-body protocol">
     {{protocol.body_html|safe}}
+    <hr>
+    <div>
+        <a href="{{url_for('protocol_export', protocol_id=protocol.id)}}">Exportovat ve formátu PDF</a>
+    </div>
   </div>
 </div>
 {% endblock %}
