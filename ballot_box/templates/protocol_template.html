@@ -18,14 +18,14 @@
   </dt>
   <dd>{{ballot.max_votes}}</dd>
   <dt>Voliči</dt>
-  <dd>{{ballot.unit}} {% if ballot.supporters_too %}členové i příznivci{% else %}členové{% endif %}</dd>
+  <dd>{{ballot.unit}} členové{% if ballot.supporters_too %} i příznivci{% endif %}</dd>
   <dt>Termín</dt>
   <dd>{{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}}</dd>
 </dl>
 <h2>Výsledek {%if ballot.is_election %}volby{% else %}hlasování{% endif %}</h2>
 <dl class="dl-horizontal">
   <dt>Zúčastněných</dt>
-  <dd>{{ballot.voters.count()}}</dd>
+  <dd>{{ballot.voters.count()}}/{{voters.count}} ({{voters.percentage}} %)</dd>
 </dl>
 {%- if ballot.is_yes_no %}
   <table class="table">
