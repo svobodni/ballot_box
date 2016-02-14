@@ -63,7 +63,7 @@ $(document).ready(function() {
         });
     });
 
-    if ($('.bo-profile').length>0) {
+    if ($('.bo-profile').length > 0) {
         $('.bo-profile-empty').html('<i class="fa fa-user fa-3x"></i>');
     }
 
@@ -82,7 +82,17 @@ $(document).ready(function() {
     $.datetimepicker.setLocale('cs');
     $('input[type=datetime]').datetimepicker({
         format: 'Y-m-d H:i:s',
-        dayOfWeekStart: 1
+        dayOfWeekStart: 1,
+        allowTimes: (
+            function(i, range) {
+                while(i--) {
+                    range.unshift(i.toString() + ':00');
+                }
+
+                range.push('23:59');
+
+                return range;
+            })(24, [])
     });
 
     $('.send-announcement').on('click', function(e) {

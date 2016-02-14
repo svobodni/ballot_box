@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 from celery import Celery
 from flask import Flask
 from flask.ext.mail import Mail
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_wtf.csrf import CsrfProtect
-from werkzeug.contrib.cache import SimpleCache
+from werkzeug.contrib.cache import FileSystemCache
 
 
 class BallotBoxError(Exception):
@@ -52,8 +54,12 @@ def make_celery(app):
 
 celery = make_celery(app)
 
+try:
+    os.makedirs(app.config['CACHE_DIR'])
+except OSError:
+    pass
+
+cache = FileSystemCache(app.config['CACHE_DIR'])  # default_timeout=300
+
 import tasks  # NOQA
-
-cache = SimpleCache()
-
 import ballot_box.views  # NOQA

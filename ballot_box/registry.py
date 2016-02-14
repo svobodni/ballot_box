@@ -6,7 +6,7 @@ import requests
 from flask import g, request, render_template
 from flask.ext.mail import Message
 
-from ballot_box import app, BallotBoxError, mail
+from ballot_box import app, cache, mail, BallotBoxError
 
 
 def get_jwt(jwt=None):
@@ -89,16 +89,36 @@ def send_vote_confirmation(ballot, voter, hash_digest, hash_salt,
     return body
 
 
+def get_people(ballot, jwt=None):
+    (unit_type, unit_id) = tuple(ballot.unit.code.split(','))
+    region_id = None
+
+    if unit_type == "region":
+        region_id = int(unit_id)
+    elif unit_type != "country":
+        # don't support other type of units
+        return []
+
+    return registry_get_people(not ballot.supporters_too,
+                               region_id, jwt=get_jwt(jwt))
+
+
 def registry_get_people(members_only=False, region_id=None, jwt=None):
-    r = registry_request(
-        "/people.json{0}".format(
-            "?region_id={0}".format(region_id) if region_id else ""
-        ),
-        jwt=jwt,
-    )
+    all_people = cache.get("people")
+
+    if all_people is None:
+        r = registry_request(
+            "/people.json{0}".format(
+                "?region_id={0}".format(region_id) if region_id else ""
+            ),
+            jwt=jwt,
+        )
+        all_people = r.json()["people"]
+        cache.set("people", all_people, timeout=1e4)
+
     people = []
 
-    for p in r.json()["people"]:
+    for p in all_people:
         status_ok = p.get("status", "") in \
             ("regular_member", "regular_supporter")
 
