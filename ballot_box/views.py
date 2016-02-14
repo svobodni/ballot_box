@@ -25,7 +25,8 @@ from models import Connection, User, Ballot, \
     BallotOption, Vote, Voter, BallotProtocol, Settings
 from forms import BallotForm, BallotEditForm, \
     BallotProtocolForm, BallotProtocolEditForm, SettingsForm
-from registry import registry_request, send_vote_confirmation, get_jwt
+from registry import registry_request, send_vote_confirmation, \
+    get_jwt, get_people
 
 
 def sanitize_html(html, extended=False):
@@ -322,9 +323,17 @@ def ballot_protocol_new(ballot_id):
         db.session.commit()
         flash(u"Protokol úspěšně uložen.", "success")
         return redirect(url_for("ballot_protocol_list", ballot_id=ballot_id))
+
+    people = get_people(ballot)
+    count = len(people)
+    voters = {
+        'count': count,
+        'percentage': int(100.0 * ballot.voters.count() / count),
+    }
     form.body_html.data = render_template(
         'protocol_template.html', ballot=ballot, name=name, date=today,
-        result=result, elected=filter(lambda o: o["elected"], result))
+        result=result, elected=filter(lambda o: o["elected"], result),
+        voters=voters)
     return render_template('ballot_protocol_new.html', form=form)
 
 
