@@ -36,7 +36,12 @@
               {% endif %}
             </td>
             <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
-            <td>{% if ballot.candidate_self_signup %}přihl.&nbsp;{{ballot.candidate_signup_until|fmt_dt_line}}<br/>{% endif %}
+            <td>
+              {% if ballot.candidate_self_signup %}
+                <div title="Přihlašování kandidátů">
+                  ({% if ballot.candidate_signup_from %}{{ballot.candidate_signup_from|fmt_dt_line}}&ndash;<br/>{% endif %}{{ballot.candidate_signup_until|fmt_dt_line}})
+                </div>
+              {% endif %}
               od&nbsp;{{ballot.begin_at|fmt_dt_line}}<br/>
               do&nbsp;{{ballot.finish_at|fmt_dt_line}}
             </td>

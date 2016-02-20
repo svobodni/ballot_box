@@ -17,6 +17,9 @@ from models import Ballot, BallotProtocol, Settings
 BaseDateTimeInput.range_validator_class = int
 BaseModelForm = model_form_factory(Form)
 
+validator_name = validators.Length(
+    min=10, message=u"Název musí mít alespoň 10 znaků.")
+
 
 class ModelForm(BaseModelForm):
     @classmethod
@@ -67,10 +70,11 @@ class BallotForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
-                "candidate_self_signup", "candidate_signup_until"]
+                "candidate_self_signup", "candidate_signup_from",
+                "candidate_signup_until"]
         field_args = {
             "name": {
-                "validators": [validators.Length(min=10)],
+                "validators": [validator_name],
                 "description": u"Např. Volba předsedy Jihomoravského KrS",
             },
             "begin_at": {
@@ -93,6 +97,9 @@ class BallotForm(ModelForm):
             },
             "description": {
                 "description": u"HTML",
+            },
+            "candidate_signup_from": {
+                "validators": [validators.Optional()],
             },
             "candidate_signup_until": {
                 "validators": [
@@ -117,11 +124,11 @@ class BallotEditForm(ModelForm):
         model = Ballot
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
-                "candidate_self_signup", "candidate_signup_until",
-                "approved", "cancelled"]
+                "candidate_self_signup", "candidate_signup_from",
+                "candidate_signup_until", "approved", "cancelled"]
         field_args = {
             "name": {
-                "validators": [validators.Length(min=10)],
+                "validators": [validator_name],
             },
             "begin_at": {
                 "validators": [
@@ -145,6 +152,9 @@ class BallotEditForm(ModelForm):
             },
             "description": {
                 "description": u"HTML",
+            },
+            "candidate_signup_from": {
+                "validators": [validators.Optional()],
             },
             "candidate_signup_until": {
                 "validators": [validators.Optional()],

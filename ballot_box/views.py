@@ -222,7 +222,8 @@ def ballot_edit(ballot_id):
             db.session.add(db_option)
 
         db.session.commit()
-        flash(u"Volba/hlasování bylo úspěšně změněno.", "success")
+        flash(u"Hlasování bylo úspěšně změněno." if ballot.type == "VOTING"
+              else u"Volba byla úspěšně změněna.", "success")
         return redirect(url_for("ballot_list"))
     return render_template('ballot_edit.html', form=form)
 
@@ -272,7 +273,7 @@ def ballot_options(ballot_id):
             db.session.add(db_option)
             added += 1
         db.session.commit()
-        flash(u"Úspěšně přidáno {}, obebráno {}, nezměněno {}"
+        flash(u"Úspěšně přidáno {}, odebráno {}, nezměněno {}"
               .format(added, removed, unchanged), "success")
         return redirect(url_for("ballot_list"))
     return render_template('ballot_options.html', ballot=ballot)
@@ -571,7 +572,7 @@ def polling_station_confirm(ballot_id):
         flash(unicode(e), "danger")
         return redirect(url_for('polling_station_item', ballot_id=ballot_id))
     except ValueError as e:
-        flash(u"Některý z hlasů má neplatnou hodnotu", "danger")
+        flash(u"Některý z hlasů nemá platnou hodnotu", "danger")
         return redirect(url_for('polling_station_item', ballot_id=ballot_id))
 
     title_dict = {option.id: option.title for option in ballot.options}
@@ -724,10 +725,13 @@ def polling_station_result(ballot_id):
 @app.route("/podani_kandidatury/")
 @login_required
 def candidate_signup():
+    now = datetime.datetime.now()
     ballots = (db.session.query(Ballot)
                .filter_by(approved=True, candidate_self_signup=True,
                           cancelled=False, type="ELECTION")
-               .filter(Ballot.begin_at > datetime.datetime.now())
+               .filter((Ballot.candidate_signup_from.is_(None) |
+                       (Ballot.candidate_signup_from <= now)) &
+                       (Ballot.candidate_signup_until > now))
                .order_by(Ballot.begin_at.desc()))
     # Show ballots where the user can sign up first (stored is stable, so it
     # keeps the time ordering)
@@ -759,9 +763,9 @@ def candidate_signup_confirm(ballot_id):
     if not ballot.approved:
         raise BallotBoxError(
             u"Tato volba nebyla schválena Volební komisí.", 403)
-    if ballot.candidate_signup_until < datetime.datetime.now():
+    if not ballot.in_time_candidate_signup:
         raise BallotBoxError(
-            u"Přihlašovnání do této volby již skončilo.", 403)
+            u"Přihlašování do této volby již skončilo.", 403)
 
     if request.method == "POST":
         user_id = g.user.id
