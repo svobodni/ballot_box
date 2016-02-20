@@ -132,6 +132,7 @@ class Connection(db.Model):
     user_id = db.Column(db.Integer)
     name = db.Column(db.Unicode(100))
     profile = db.Column(db.UnicodeText)
+    valid = db.Column(db.Boolean, nullable=False, default=True)
     jwt = db.Column(db.Text)
 
 UNITS = [
