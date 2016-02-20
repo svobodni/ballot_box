@@ -59,14 +59,15 @@ def force_auth():
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if g.get("user", None) is None:
+        if g.get("user") is None:
             conn_id = session.get("conn_id", False)
             conn_token = session.get("conn_token", False)
 
             if conn_id and conn_token:
                 conn = (db.session.query(Connection)
                                   .filter_by(id=conn_id, token=conn_token,
-                                             remote_addr=request.remote_addr)
+                                             remote_addr=request.remote_addr,
+                                             valid=True)
                                   .filter(Connection.last_click
                                           > datetime.datetime.now()
                                           - app.config["LOGIN_TIMEOUT"])
@@ -171,6 +172,23 @@ def login(redirect_after=None):
     except:
         raise
         return force_auth()
+
+
+@app.route("/logout/")
+def logout():
+    if g.get("user") is None:
+        conn_id = session.get("conn_id", False)
+        conn_token = session.get("conn_token", False)
+
+        if conn_id and conn_token:
+            conn = db.session.query(Connection).filter_by(
+                id=conn_id, token=conn_token).first()
+            conn.valid = False
+            db.session.commit()
+
+    response = redirect("https://registr.svobodni.cz/people/sign_out")
+    response.set_cookie("session", expires=0)
+    return response
 
 
 @app.route("/ballot/")
