@@ -11,7 +11,7 @@ from wtforms_components.widgets import BaseDateTimeInput
 # The variable db here is a SQLAlchemy object instance from
 # Flask-SQLAlchemy package
 from ballot_box import db
-from models import Ballot, BallotProtocol
+from models import Ballot, BallotProtocol, Settings
 
 # Workaround to fix lambdas in DateRange(min)
 BaseDateTimeInput.range_validator_class = int
@@ -29,7 +29,7 @@ def morning(days=1, at=9):
             .replace(hour=at, minute=0, second=0))
 
 
-def midnight(days=8):
+def midnight(days=10):
     return ((datetime.datetime.now() + datetime.timedelta(days=days))
             .replace(hour=23, minute=59, second=59))
 
@@ -79,7 +79,7 @@ class BallotForm(ModelForm):
                         min=min_timedelta(hours=1),
                         message=u"Začátek musí být nejméně za hodinu."),
                 ],
-                "default": lambda: morning(days=2, at=9),
+                "default": lambda: morning(days=3, at=9),
             },
             "finish_at": {
                 "validators": [
@@ -105,8 +105,8 @@ class BallotForm(ModelForm):
                         reverse=True
                     ),
                 ],
-                "default": lambda: morning(days=1, at=8),
-                "description": u"Nejméně 24 hodin před začátkem voleb",
+                "default": lambda: midnight(days=1),
+                "description": u"Nejméně 24 hodin před začátkem voleb.",
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
@@ -130,7 +130,7 @@ class BallotEditForm(ModelForm):
                         message=u"Začátek musí být nejméně za 5 minut."
                     ),
                 ],
-                "default": lambda: morning(days=2, at=9),
+                "default": lambda: morning(days=3, at=9),
             },
             "finish_at": {
                 "validators": [
@@ -148,7 +148,7 @@ class BallotEditForm(ModelForm):
             },
             "candidate_signup_until": {
                 "validators": [validators.Optional()],
-                "default": lambda: morning(days=1, at=8),
+                "default": lambda: midnight(days=1),
             }
         }
 BallotEditForm.submit = SubmitField(u'Uložit')
@@ -166,3 +166,10 @@ class BallotProtocolEditForm(ModelForm):
         model = BallotProtocol
         only = ["body_html", "approved"]
 BallotProtocolEditForm.submit = SubmitField(u'Uložit')
+
+
+class SettingsForm(ModelForm):
+    class Meta:
+        model = Settings
+        only = ["signature"]
+SettingsForm.submit = SubmitField(u'Uložit')
