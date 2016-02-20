@@ -19,6 +19,7 @@ from flask import render_template, g, request, redirect, \
 from wtforms.validators import ValidationError
 from babel.dates import format_datetime, format_date
 
+from . import cache
 from utils import compute_hash_base, DAYS_RANGE
 from ballot_box import app, db, mail, tasks, BallotBoxError
 from models import Connection, User, Ballot, \
@@ -402,6 +403,7 @@ def ballot_protocol_edit(protocol_id):
         protocol.body_html = sanitize_html(protocol.body_html, extended=True)
         db.session.add(protocol)
         db.session.commit()
+        cache.delete("protocol_%s" % protocol_id)
         flash(u"Protokol úspěšně uložen.", "success")
         return redirect(url_for(
             "ballot_protocol_list", ballot_id=protocol.ballot_id))
@@ -432,18 +434,24 @@ def protocol_export(protocol_id):
     if not g.user.can_edit_ballot() and not protocol.approved:
         raise BallotBoxError(u"Protokol ještě nebyl schválen.", 403)
 
-    body = render_template("protocol_export.html", protocol=protocol)
+    cache_key = "protocol_%s" % protocol_id
+    pdf = cache.get(cache_key)
 
-    options = {
-        "encoding": "UTF-8",
-        "page-size": "A4",
-        "margin-top": "2cm",
-        "margin-left": "2cm",
-        "margin-bottom": "2cm",
-        "margin-right": "2cm",
-    }
+    if pdf is None:
+        body = render_template("protocol_export.html", protocol=protocol)
 
-    response = make_response(pdfkit.from_string(body, False, options=options))
+        options = {
+            "encoding": "UTF-8",
+            "page-size": "A4",
+            "margin-top": "2cm",
+            "margin-left": "2cm",
+            "margin-bottom": "2cm",
+            "margin-right": "2cm",
+        }
+        pdf = pdfkit.from_string(body, False, options=options)
+        cache.set(cache_key, pdf)
+
+    response = make_response(pdf)
     response.mimetype = "application/pdf"
     return response
 
