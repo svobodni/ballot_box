@@ -5,9 +5,10 @@
     <h3>Vzor pro maily</h3>
 {% if ballot.is_election %}
     <h4>Podání kandidatury</h4>
-<pre>
-{{ballot.name}} — podání kandidatur
-
+<p>
+<input type="text" style="margin-bottom:10px" class="form-control col-md-12" onclick="this.focus();this.select()"
+value="{{ballot.name}} — podání kandidatur">
+<textarea style="margin-bottom:10px" class="form-control col-md-12" rows="12" onclick="this.focus();this.select()">
 Vážení členové{% if ballot.supporters_too %} a příznivci{% endif %} Svobodných{{ballot.mail_greeting}},
 
 do {{ballot.candidate_signup_until|fmt_dt_range}} probíhá podání kandidatur pro {{ballot.mail_name}}.
@@ -17,19 +18,23 @@ Samotné hlasování pak proběhne v termínu od {{ballot.begin_at|fmt_dt_range}
 Kandidaturu můžete podat ve volebním systému Svobodných: {{url_for('candidate_signup', _external=True)}}
 
 Stanovy strany:
-https://web.svobodni.cz/public/media/Archiv-dokumentu/stanovy-svobodni-2016.pdf
+https://public.svobodni.cz/svobodni/stanovy-svobodni.pdf
 Více o volebním systému Svobodných:
-https://web.svobodni.cz/lide/volebni-system-svobodnych
+https://public.svobodni.cz/svobodni/volebni-system.pdf
 {% if not ballot.supporters_too %}Dokumenty Volební komise:
-https://files.svobodni.cz/vk/pro-členy/{% endif %}
+https://files.svobodni.cz/vk/pro-členy/
+{% endif %}{% if ballot.supporters_too %}Všeobecná pravidla pro výběr kandidátů:
+https://public.svobodni.cz/svobodni/vseobecna-pravidla-pro-vyber-kandidatu.pdf
+{% endif %}
 
 {{signature}}
-</pre>
+</textarea></p>
 {% endif %}
     <h4>Zahájení hlasování</h4>
-<pre>
-{{ballot.name}} — zahájení hlasování
-
+<p>
+<input type="text" style="margin-bottom:10px" class="form-control col-md-12" onclick="this.focus();this.select()"
+value="{{ballot.name}} — zahájení hlasování">
+<textarea style="margin-bottom:10px" class="form-control col-md-12" rows="12" onclick="this.focus();this.select()">
 Vážení členové{% if ballot.supporters_too %} a příznivci{% endif %} Svobodných{{ballot.mail_greeting}},
 
 v termínech {{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}} probíhá {{ballot.mail_name}}.
@@ -38,14 +43,17 @@ v termínech {{ballot.begin_at|fmt_dt}} až {{ballot.finish_at|fmt_dt}} probíh�
 Hlasovat {% if ballot.unit.code.startswith("region") %}mohou pouze členové krajského sdružení{% elif ballot.unit.code.startswith("country") %}mohou členové{% if ballot.supporters_too %} a příznivci{% endif %} z celé republiky{% else %}můžete{% endif %} ve volebním systému Svobodných: {{url_for('polling_station', _external=True)}}
 
 Stanovy strany:
-https://web.svobodni.cz/public/media/Archiv-dokumentu/stanovy-svobodni-2016.pdf
+https://public.svobodni.cz/svobodni/stanovy-svobodni.pdf
 Více o volebním systému Svobodných:
-https://web.svobodni.cz/lide/volebni-system-svobodnych
+https://public.svobodni.cz/svobodni/volebni-system.pdf
 {% if not ballot.supporters_too %}Dokumenty Volební komise:
-https://files.svobodni.cz/vk/pro-členy/{% endif %}
+https://files.svobodni.cz/vk/pro-členy/
+{% endif %}{% if ballot.supporters_too %}Všeobecná pravidla pro výběr kandidátů:
+https://public.svobodni.cz/svobodni/vseobecna-pravidla-pro-vyber-kandidatu.pdf
+{% endif %}
 
 {{signature}}
-</pre>
+</textarea></p>
   </div>
 </div>
 {% endblock %}
