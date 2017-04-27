@@ -821,7 +821,8 @@ def send_announcement(protocol_id):
                       else u"hlasování"
         msg = Message(u"Oznámení výsledku {0}".format(ballot_type),
                       sender=(u"Volební komise", "vk@svobodni.cz"),
-                      recipients=["kancelar@svobodni.cz", "kk@svobodni.cz"])
+                      recipients=["kancelar@svobodni.cz", "kk@svobodni.cz"],
+                      cc=["vk@svobodni.cz"])
         msg.body = render_template('protocol_announcement.txt',
                                    protocol=protocol)
         mail.send(msg)
