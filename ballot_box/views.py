@@ -821,13 +821,13 @@ def send_announcement(protocol_id):
                       else u"hlasování"
         msg = Message(u"Oznámení výsledku {0}".format(ballot_type),
                       sender=(u"Volební komise", "vk@svobodni.cz"),
-                      recipients=["kancelar@svobodni.cz", "kk@svobodni.cz"])
+                      recipients=app.config["ANNOUNCE_RESULTS_RECIPIENTS"])
         msg.body = render_template('protocol_announcement.txt',
                                    protocol=protocol)
         mail.send(msg)
         flash(u"Výsledek volby oznámen.", "success")
     else:
-        flash(u"Oznámení nebylo odesláno.", "danger")
+        flash(u"Oznámení nebylo odesláno na %s." % ", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), "danger")
 
     return redirect(url_for("ballot_protocol_list",
                             ballot_id=protocol.ballot_id))
