@@ -18,12 +18,13 @@ class BallotBoxTestCase(unittest.TestCase):
     def create_ballot(self, max_votes):
         pre_count = db.session.query(Ballot).count()
         ballot = Ballot()
-        ballot.name = "Test1"
+        ballot.name = u"Test1"
         ballot.begin_at = datetime.datetime.now()
         ballot.finish_at = datetime.datetime.now()
         ballot.type = "VOTING"
         ballot.unit = "country,1"
         ballot.max_votes = max_votes
+        ballot.candidate_signup_until = datetime.datetime.now()
 
         db.session.add(ballot)
         db.session.commit()
@@ -38,7 +39,7 @@ class BallotBoxTestCase(unittest.TestCase):
         for i in range(count):
             bo = BallotOption()
             bo.ballot_id = ballot.id
-            bo.title = "{0} {1}".format(ballot.id, i)
+            bo.title = u"{0} {1}".format(ballot.id, i)
             db.session.add(bo)
             options.append(bo)
         db.session.commit()
@@ -55,7 +56,7 @@ class BallotBoxTestCase(unittest.TestCase):
         for i in range(count):
             v = Vote()
             v.ballot_option_id = bo.id
-            v.hash_digest = "hd {0} {1}".format(bo.id, i)
+            v.hash_digest = u"hd {0} {1}".format(bo.id, i)
             v.value = value
             db.session.add(v)
             votes.append(v)
