@@ -348,7 +348,7 @@ def ballot_protocol_new(ballot_id):
     count = len(people)
     voters = {
         'count': count,
-        'percentage': int(100.0 * ballot.voters.count() / count),
+        'percentage': int(100.0 * ballot.voters.count() / count) if count > 0 else 0,
     }
     form.body_html.data = render_template(
         'protocol_template.html', ballot=ballot, name=name, date=today,
