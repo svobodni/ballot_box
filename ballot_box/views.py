@@ -830,10 +830,16 @@ def send_announcement(protocol_id):
         msg.body = render_template('protocol_announcement.txt',
                                    protocol=protocol)
         mail.send(msg)
+        
+        protocol.announced = 1
+        db.session.commit()
+
+        #TODO: pass via api directly to registry
+
         flash(u"Výsledek volby oznámen.", "success")
     else:
         flash(u"Oznámení nebylo odesláno na %s." % ", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), "danger")
-
+    
     return redirect(url_for("ballot_protocol_list",
                             ballot_id=protocol.ballot_id))
 

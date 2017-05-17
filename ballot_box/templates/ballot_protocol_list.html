@@ -13,14 +13,16 @@
           <tr>
             <td><a href="{{url_for('protocol_item', protocol_id=protocol.id)}}">{{protocol.created_at}}</a></td>
             <td>
-              {% if protocol.approved %}
+                {% if protocol.approved %}
                 <span class="label label-success">Schváleno</span>
-              {% endif %}
+                {% endif %}{% if protocol.announced %}
+                <span class="label label-success">Oznámeno</span>
+                {% endif %}
             </td>
             <td>
               <a href="{{url_for('ballot_protocol_edit', protocol_id=protocol.id)}}" class="btn btn-default btn-xs" title="Upravit"><i class="fa fa-pencil"></i></a>
               <a href="{{url_for('protocol_export', protocol_id=protocol.id)}}" class="btn btn-default btn-xs" title="Exportovat do PDF"><i class="fa fa-file-pdf-o"></i></a>
-              {% if protocol.approved %} 
+              {% if protocol.approved and not protocol.announced %} 
                   <a href="{{url_for('send_announcement', protocol_id=protocol.id)}}" class="btn btn-default btn-xs send-announcement" title="Ohlásit výsledek volby do registru"><i class="fa fa-envelope"></i></a>
               {% endif %}
             </td>
