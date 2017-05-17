@@ -671,14 +671,15 @@ def polling_station_vote(ballot_id):
     voter.user_agent = request.user_agent.string
     db.session.add(voter)
 
+    send_mail = "send_confirmation_email" in request.form
     email_body = send_vote_confirmation(ballot, voter, hash_digest,
-                                        hash_salt, vote_timestamp)
+                                        hash_salt, vote_timestamp, send_mail)
 
     db.session.commit()
 
     return render_template(
         'polling_station_vote.html', ballot=ballot,
-        hash_digest=hash_digest, email_body=email_body)
+        hash_digest=hash_digest, email_body=email_body, really_send=send_mail)
 
 
 def ballot_result(ballot):
