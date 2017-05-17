@@ -21,7 +21,8 @@
         {% endif %}
       </p>
       <p><button id="show-hashes" class="btn btn-default">Zobrazit kontrolní řetězce</button></p>
-      <p>Počet hlasujících: {{ballot.voters.count()}}</p>
+      <p>Počet hlasujících: {{ballot.voters.count()}}</p>{% if ballot.quorum  %}
+      <p>Kvórum: {{ballot.quorum}}</p>{% endif %}
       <ol>
         {% for option in result %}
           <li>
@@ -41,7 +42,7 @@
               {% endif %}
             </div>
           </li>
-        {% endfor %}
+        {% endfor %}  
       </ol>
       {% if ballot.abstainers %}
         <p>Zdrželo se: {{ballot.abstainers.count()}}</p>

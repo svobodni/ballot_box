@@ -693,9 +693,12 @@ def ballot_result(ballot):
         for db_vote in db_option.votes:
             option["votes"][db_vote.value].append(db_vote.hash_digest)
         result.append(option)
+    quorum = 0
+    if ballot.quorum:
+        quorum = ballot.quorum
     if ballot.is_yes_no:
         for option in result:
-            if len(option["votes"][1]) > len(option["votes"][-1]):
+            if len(option["votes"][1]) > len(option["votes"][-1]) and len(option["votes"][1]) >= quorum:
                 option["elected"] = True
             option["order_by"] = len(option["votes"][1]) \
                 - len(option["votes"][-1])
@@ -710,7 +713,7 @@ def ballot_result(ballot):
         for i in range(len(result)):
             if result[i]["order_by"] < current_votes and places_left >= 0:
                 for r in current_place:
-                    if r["order_by"] > 0:
+                    if r["order_by"] > 0 and r["order_by"] > quorum:
                         r["elected"] = True
                 current_place = []
             current_votes = result[i]["order_by"]
