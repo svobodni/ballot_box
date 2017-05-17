@@ -21,7 +21,7 @@ from babel.dates import format_datetime, format_date
 
 from . import cache
 from utils import compute_hash_base, DAYS_RANGE
-from ballot_box import app, db, mail, tasks, BallotBoxError
+from ballot_box import app, db, mail, tasks, BallotBoxError, registry
 from models import Connection, User, Ballot, \
     BallotOption, Vote, Voter, BallotProtocol, Settings
 from forms import BallotForm, BallotEditForm, \
@@ -206,15 +206,16 @@ def ballot_new():
     if not g.user.can_create_ballot():
         abort(403)
     form = BallotForm()
+    mc = registry.registry_body_members()
     if form.validate_on_submit():
         ballot = Ballot()
-        form.populate_obj(ballot)
+        form.populate_obj(ballot)   
         ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně přidáno.", "success")
         return redirect(url_for("ballot_list"))
-    return render_template('ballot_new.html', form=form)
+    return render_template('ballot_new.html', form=form, membercounts = mc)
 
 
 @app.route("/ballot/<int:ballot_id>/", methods=('GET', 'POST'))

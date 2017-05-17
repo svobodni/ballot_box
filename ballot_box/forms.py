@@ -80,7 +80,7 @@ class BallotForm(ModelForm):
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
                 "candidate_self_signup", "candidate_signup_from",
-                "candidate_signup_until"]
+                "candidate_signup_until", "quorum"]
         field_args = {
             "name": {
                 "validators": [validator_name],
@@ -124,6 +124,10 @@ class BallotForm(ModelForm):
                 ],
                 "default": lambda: midnight(days=1),
                 "description": u"Nejméně 24 hodin před začátkem voleb.",
+            },
+            "quorum": {
+                "description": u"Minimální počet hlasů, nutných k zvolení. Nechte prázdné, pokud nechcete aplikovat.<span><br />" + \
+                               u"Momentální počet členů zvolené jednotky je <span id=\"unit_members_count\">?</span>, nadpoloviční většina <b>?</b>.</span>"
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
@@ -135,7 +139,7 @@ class BallotEditForm(ModelForm):
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
                 "candidate_self_signup", "candidate_signup_from",
-                "candidate_signup_until", "approved", "cancelled"]
+                "candidate_signup_until", "quorum", "approved", "cancelled"]
         field_args = {
             "name": {
                 "validators": [validator_name],

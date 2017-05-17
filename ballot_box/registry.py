@@ -47,6 +47,18 @@ def registry_units():
         pass
     return units
 
+def registry_body_members():
+    units = {}
+    try:
+        r = registry_request("/bodies.json")
+        bodies = r.json()["bodies"]
+        for body in bodies:
+            # Only republic organs
+            if body["organization"]["id"] == 100:
+                units["body,{}".format(body["id"])] = len(body["members"])
+    except KeyError:
+        pass
+    return units
 
 def send_vote_confirmation(ballot, voter, hash_digest, hash_salt,
                            vote_timestamp, jwt=None):

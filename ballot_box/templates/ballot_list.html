@@ -35,7 +35,13 @@
                 +Př.
               {% endif %}
             </td>
-            <td>{{ballot.options|length}}/{{ballot.max_votes}}</td>
+            <td>{{ballot.options|length}}/{{ballot.max_votes}}
+              {% if ballot.quorum  %}
+                <div title="Kvórum">
+                    Q: {{ballot.quorum}}
+                </div>
+              {% endif %}
+            </td>
             <td>
               {% if ballot.candidate_self_signup %}
                 <div title="Přihlašování kandidátů">
