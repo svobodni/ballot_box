@@ -16,7 +16,9 @@
     Počet hlasování
   {%- endif %}
   </dt>
-  <dd>{{ballot.max_votes}}</dd>
+  <dd>{{ballot.max_votes}}</dd>{% if ballot.quorum  %}
+  <dt>Kvórum</dt>
+  <dd>{{ballot.quorum}} hlasů</dd>{% endif %}
   <dt>Voliči</dt>
   <dd>{{ballot.unit}} členové{% if ballot.supporters_too %} i příznivci{% endif %}</dd>
   <dt>Termín</dt>

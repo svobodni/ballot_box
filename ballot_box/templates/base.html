@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -14,7 +14,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
   <script type="text/javascript" src="//web.svobodni.cz/cache/jsloader-d41d8cd98f00.js?0"></script>
   <script type="text/javascript">
-    BASE_URL = "{{ url_for('index', _external=True)}}";
+      BASE_URL = "{{ url_for('index', _external=True)}}";
+      REGISTRY_URL = "{{ config["REGISTRY_URI"] }}";
   </script>
   <script type="text/javascript" src="{{ url_for('static', filename='jquery.datetimepicker.full.min.js')}}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='ballot_box.js')}}"></script>

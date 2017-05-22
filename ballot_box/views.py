@@ -21,7 +21,7 @@ from babel.dates import format_datetime, format_date
 
 from . import cache
 from utils import compute_hash_base, DAYS_RANGE
-from ballot_box import app, db, mail, tasks, BallotBoxError
+from ballot_box import app, db, mail, tasks, BallotBoxError, registry
 from models import Connection, User, Ballot, \
     BallotOption, Vote, Voter, BallotProtocol, Settings
 from forms import BallotForm, BallotEditForm, \
@@ -206,15 +206,16 @@ def ballot_new():
     if not g.user.can_create_ballot():
         abort(403)
     form = BallotForm()
+    mc = registry.registry_body_members()
     if form.validate_on_submit():
         ballot = Ballot()
-        form.populate_obj(ballot)
+        form.populate_obj(ballot)   
         ballot.description = sanitize_html(ballot.description)
         db.session.add(ballot)
         db.session.commit()
         flash(u"Volba/hlasování bylo úspěšně přidáno.", "success")
         return redirect(url_for("ballot_list"))
-    return render_template('ballot_new.html', form=form)
+    return render_template('ballot_new.html', form=form, membercounts = mc)
 
 
 @app.route("/ballot/<int:ballot_id>/", methods=('GET', 'POST'))
@@ -348,7 +349,7 @@ def ballot_protocol_new(ballot_id):
     count = len(people)
     voters = {
         'count': count,
-        'percentage': int(100.0 * ballot.voters.count() / count),
+        'percentage': int(100.0 * ballot.voters.count() / count) if count > 0 else 0,
     }
     form.body_html.data = render_template(
         'protocol_template.html', ballot=ballot, name=name, date=today,
@@ -670,14 +671,15 @@ def polling_station_vote(ballot_id):
     voter.user_agent = request.user_agent.string
     db.session.add(voter)
 
+    send_mail = "send_confirmation_email" in request.form
     email_body = send_vote_confirmation(ballot, voter, hash_digest,
-                                        hash_salt, vote_timestamp)
+                                        hash_salt, vote_timestamp, send_mail)
 
     db.session.commit()
 
     return render_template(
         'polling_station_vote.html', ballot=ballot,
-        hash_digest=hash_digest, email_body=email_body)
+        hash_digest=hash_digest, email_body=email_body, really_send=send_mail)
 
 
 def ballot_result(ballot):
@@ -691,9 +693,12 @@ def ballot_result(ballot):
         for db_vote in db_option.votes:
             option["votes"][db_vote.value].append(db_vote.hash_digest)
         result.append(option)
+    quorum = 0
+    if ballot.quorum:
+        quorum = ballot.quorum
     if ballot.is_yes_no:
         for option in result:
-            if len(option["votes"][1]) > len(option["votes"][-1]):
+            if len(option["votes"][1]) > len(option["votes"][-1]) and len(option["votes"][1]) >= quorum:
                 option["elected"] = True
             option["order_by"] = len(option["votes"][1]) \
                 - len(option["votes"][-1])
@@ -708,7 +713,7 @@ def ballot_result(ballot):
         for i in range(len(result)):
             if result[i]["order_by"] < current_votes and places_left >= 0:
                 for r in current_place:
-                    if r["order_by"] > 0:
+                    if r["order_by"] > 0 and r["order_by"] > quorum:
                         r["elected"] = True
                 current_place = []
             current_votes = result[i]["order_by"]
@@ -821,14 +826,20 @@ def send_announcement(protocol_id):
                       else u"hlasování"
         msg = Message(u"Oznámení výsledku {0}".format(ballot_type),
                       sender=(u"Volební komise", "vk@svobodni.cz"),
-                      recipients=["kancelar@svobodni.cz", "kk@svobodni.cz"])
+                      recipients=app.config["ANNOUNCE_RESULTS_RECIPIENTS"])
         msg.body = render_template('protocol_announcement.txt',
                                    protocol=protocol)
         mail.send(msg)
+        
+        protocol.announced = 1
+        db.session.commit()
+
+        #TODO: pass via api directly to registry
+
         flash(u"Výsledek volby oznámen.", "success")
     else:
-        flash(u"Oznámení nebylo odesláno.", "danger")
-
+        flash(u"Oznámení nebylo odesláno na %s." % ", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), "danger")
+    
     return redirect(url_for("ballot_protocol_list",
                             ballot_id=protocol.ballot_id))
 

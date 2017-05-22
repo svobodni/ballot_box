@@ -95,6 +95,25 @@ $(document).ready(function() {
             })(24, [])
     });
 
+    $('select#unit').on('change', function () {
+        var selected = $(this).val();
+        var result = $('#unit_members_count');
+        if (selected.indexOf("body,") > -1) {
+            result.parent().fadeIn();
+            if (selected in memberCounts) {
+                result.text(memberCounts[selected]);
+                result.next().text(Math.floor(memberCounts[selected]/2) + 1);
+            }
+            else {
+                result.text("CHYBA");
+            }
+        }
+        else {
+            result.parent().fadeOut();
+        }
+    });
+    $('select#unit').triggerHandler('change');
+
     $('.send-announcement').on('click', function(e) {
         if (!confirm('Opravdu chcete rozeslat výsledek volby e-mailem?')) {
             e.preventDefault();

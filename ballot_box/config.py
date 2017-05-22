@@ -8,7 +8,7 @@ class Config(object):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/test.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    REGISTRY_URI = "https://registr.svobodni.cz"
+    REGISTRY_URI = "http://localhost:3000"
     SECRET_KEY = "not a secret"
     LOGIN_TIMEOUT = datetime.timedelta(minutes=30)
     USE_SMTP = False
@@ -17,6 +17,7 @@ class Config(object):
     CELERY_RESULT_BACKEND = "redis://localhost:6379/11"
     SERVER_NAME = "127.0.0.1:5000"
     CACHE_DIR = "/tmp/vs"
+    ANNOUNCE_RESULTS_RECIPIENTS = ["kancelar@svobodni.cz", "kk@svobodni.cz"]
 
 
 class ProductionConfig(Config):

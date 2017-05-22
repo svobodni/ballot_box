@@ -47,44 +47,56 @@ def registry_units():
         pass
     return units
 
+def registry_body_members():
+    units = {}
+    try:
+        r = registry_request("/bodies.json")
+        bodies = r.json()["bodies"]
+        for body in bodies:
+            # Only republic organs
+            if body["organization"]["id"] == 100:
+                units["body,{}".format(body["id"])] = len(body["members"])
+    except KeyError:
+        pass
+    return units
 
 def send_vote_confirmation(ballot, voter, hash_digest, hash_salt,
-                           vote_timestamp, jwt=None):
+                           vote_timestamp, really_send=True, jwt=None):
     body = render_template('confirmation_email.txt',
                            ballot=ballot,
                            voter=voter,
                            hash_digest=hash_digest,
                            hash_salt=hash_salt,
                            vote_timestamp=vote_timestamp)
+    if really_send:
+        if app.config["USE_SMTP"]:
+            msg = Message("Potvrzení hlasování",
+                          sender=(u"Volební komise", "vk@svobodni.cz"),
+                          recipients=[g.user.email])
+            msg.body = body
+            mail.send(msg)
+        else:
+            jwt = get_jwt(jwt)
+            email_dict = {
+                "auth": jwt,
+                "from": {
+                    "name": "Volební komise",
+                    "email": "vk@svobodni.cz"
+                },
+                "subject": "Potvrzení hlasování",
+                "plain": body,
+                "files": [],
+                "recipients": [{
+                    "email": g.user.email,
+                }]
+            }
 
-    if app.config["USE_SMTP"]:
-        msg = Message("Potvrzení hlasování",
-                      sender=(u"Volební komise", "vk@svobodni.cz"),
-                      recipients=[g.user.email])
-        msg.body = body
-        mail.send(msg)
-    else:
-        jwt = get_jwt(jwt)
-        email_dict = {
-            "auth": jwt,
-            "from": {
-                "name": "Volební komise",
-                "email": "vk@svobodni.cz"
-            },
-            "subject": "Potvrzení hlasování",
-            "plain": body,
-            "files": [],
-            "recipients": [{
-                "email": g.user.email,
-            }]
-        }
-
-        r = requests.post("https://mailer.svobodni.cz/json/send",
-                          data=json.dumps(email_dict))
-        if r.status_code != requests.codes.ok:
-            raise BallotBoxError(
-                "Nepodařilo se odeslat e-mail s potrvzením volby."
-            )
+            r = requests.post("https://mailer.svobodni.cz/json/send",
+                              data=json.dumps(email_dict))
+            if r.status_code != requests.codes.ok:
+                raise BallotBoxError(
+                    u"Nepodařilo se odeslat e-mail s potvrzením volby."
+                )
 
     return body
 

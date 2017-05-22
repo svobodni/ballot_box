@@ -43,26 +43,35 @@ def min_timedelta(*args, **kwargs):
 
 
 class Difference(object):
-    def __init__(self, fieldname, difference, message, reverse=False):
+    def __init__(self, fieldname, difference, message, reverse=False, enabled=None):
         self.fieldname = fieldname
         self.difference = difference
         self.message = message
         self.reverse = reverse
+        self.enabled = enabled
 
     def __call__(self, form, field):
+        if self.enabled != None:
+            try:
+                enabledfield = form[self.enabled]
+            except KeyError:
+                raise validators.ValidationError(
+                    field.gettext("Invalid field name '%s'.") % self.enabled
+                )
         try:
             other = form[self.fieldname]
         except KeyError:
             raise validators.ValidationError(
                 field.gettext("Invalid field name '%s'.") % self.fieldname
             )
-        try:
-            if not self.reverse and field.data - other.data <= self.difference:
+        if self.enabled == None or enabledfield.data:
+            try:
+                if not self.reverse and field.data - other.data <= self.difference:
+                    raise validators.ValidationError(self.message)
+                elif self.reverse and other.data - field.data <= self.difference:
+                    raise validators.ValidationError(self.message)
+            except TypeError:
                 raise validators.ValidationError(self.message)
-            elif self.reverse and other.data - field.data <= self.difference:
-                raise validators.ValidationError(self.message)
-        except TypeError:
-            raise validators.ValidationError(self.message)
 
 
 class BallotForm(ModelForm):
@@ -71,7 +80,7 @@ class BallotForm(ModelForm):
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
                 "candidate_self_signup", "candidate_signup_from",
-                "candidate_signup_until"]
+                "candidate_signup_until", "quorum"]
         field_args = {
             "name": {
                 "validators": [validator_name],
@@ -81,7 +90,7 @@ class BallotForm(ModelForm):
                 "validators": [
                     DateRange(
                         min=min_timedelta(hours=1),
-                        message=u"Začátek musí být nejméně za hodinu."),
+                        message=u"Začátek musí být nejdříve za hodinu."),
                 ],
                 "default": lambda: morning(days=3, at=9),
             },
@@ -109,11 +118,16 @@ class BallotForm(ModelForm):
                         difference=datetime.timedelta(hours=-24),
                         message=u"Konec přihlašování musí být "
                         u"nejméně 24 hodin před začátkem voleb.",
-                        reverse=True
+                        reverse=True,
+                        enabled="candidate_self_signup"
                     ),
                 ],
                 "default": lambda: midnight(days=1),
                 "description": u"Nejméně 24 hodin před začátkem voleb.",
+            },
+            "quorum": {
+                "description": u"Minimální počet hlasů, nutných k zvolení. Nechte prázdné, pokud nechcete aplikovat.<span><br />" + \
+                               u"Momentální počet členů zvolené jednotky je <span id=\"unit_members_count\">?</span>, nadpoloviční většina <b>?</b>.</span>"
             }
         }
 BallotForm.submit = SubmitField(u'Uložit')
@@ -125,7 +139,7 @@ class BallotEditForm(ModelForm):
         only = ["type", "name", "description", "unit",
                 "supporters_too", "max_votes", "begin_at", "finish_at",
                 "candidate_self_signup", "candidate_signup_from",
-                "candidate_signup_until", "approved", "cancelled"]
+                "candidate_signup_until", "quorum", "approved", "cancelled"]
         field_args = {
             "name": {
                 "validators": [validator_name],

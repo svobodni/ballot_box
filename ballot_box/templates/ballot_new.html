@@ -5,6 +5,9 @@
 {{ tinymce() }}
 <div class="row">
   <div class="col-md-8 col-md-offset-2">
+      <script type="text/javascript">
+          memberCounts = {{ membercounts|tojson|safe }}
+      </script>
     <h3>Přidat novou volbu nebo hlasování</h3>
     {{ wtf.quick_form(form, form_type="horizontal", button_map={"submit":"primary"}) }}
   </div>

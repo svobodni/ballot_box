@@ -226,6 +226,8 @@ class Ballot(db.Model):
     candidate_signup_until = db.Column(
         db.DateTime, nullable=False,
         info={'label': u'Přihlašování kandidátů do'})
+    quorum = db.Column(db.Integer, nullable=True,
+        info={'label': u'Kvórum'})
 
     @property
     def in_time_progress(self):
@@ -339,6 +341,8 @@ class BallotProtocol(db.Model):
                           info={'label': u'HTML tělo'})
     approved = db.Column(db.Boolean, nullable=False, default=False,
                          info={'label': u'Schváleno'})
+    announced = db.Column(db.Boolean, nullable=False, default=False,
+                         info={'label': u'Oznámeno'})
 
 
 class Settings(db.Model):
