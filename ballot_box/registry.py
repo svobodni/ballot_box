@@ -55,7 +55,7 @@ def registry_body_members():
         for body in bodies:
             # Only republic organs
             if body["organization"]["id"] == 100:
-                units["body,{}".format(body["id"])] = len(body["members"])
+                units["body,{}".format(body["id"])] = len(body["members"]) + len(body["vicepresidents"]) + (1 if "name" in body["president"] else 0)
     except KeyError:
         pass
     return units
