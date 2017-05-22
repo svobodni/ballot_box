@@ -1,2 +1,2 @@
 ALTER TABLE ballot ADD quorum INTEGER;
-ALTER TABLE ballotprotocol ADD announced BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE ballotprotocol ADD announced BOOLEAN NOT NULL DEFAULT FALSE;
