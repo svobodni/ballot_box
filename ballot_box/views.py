@@ -831,7 +831,7 @@ def send_announcement(protocol_id):
                                    protocol=protocol)
         mail.send(msg)
         
-        protocol.announced = 1
+        protocol.announced = True
         db.session.commit()
 
         #TODO: pass via api directly to registry
