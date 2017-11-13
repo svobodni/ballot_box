@@ -48,6 +48,9 @@ $(document).ready(function() {
                     if (data.person.cv_url) {
                         html += '<a href="' + data.person.cv_url + '"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
+                    if (data.person.description) {
+                        html += '<p>' + data.person.description + '</p>';
+                    }
                 } catch (e) {
                     console.error("Chyba při zobrazování kontaktu.");
                     console.error(e);

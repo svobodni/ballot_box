@@ -42,7 +42,7 @@
           <a href="{{url_for('protocol_item', protocol_id=ballot.approved_protocol.id)}}" class="btn btn-default"><i class="fa fa-file-text-o"></i> Volební protokol</a>
         {% endif %}
       {% elif not ballot.in_progress %}
-        Nyní neprobíhá.
+        Nyní neprobíhá. <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary">Volební místnost</a>
       {% elif g.user.already_voted(ballot) %}
         Již jste hlasoval/a.
       {% elif g.user.can_vote(ballot) %}

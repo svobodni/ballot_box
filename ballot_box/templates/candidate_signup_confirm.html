@@ -12,8 +12,10 @@
         <dd>{{g.user.id}}</dd>
       </dl>
       <p>
-        <span class="label label-warning">Upozornění</span> Pro zobrazení fotografie a kontaktů na volebním lístku musíte sdílet alespoň jeden kontakt v registru: <a href="https://registr.svobodni.cz/profiles/contacts" target="_blank">Sdílení kontaktů</a>
+        <span class="label label-warning">Upozornění</span> Pro zobrazení fotografie a kontaktů na volebním lístku musíte sdílet alespoň jeden kontakt v registru: <a href="https://registr.svobodni.cz/profiles/contacts" target="_blank">Sdílení kontaktů</a>.<br />
+        Toto jsou vaše informace sdílené nyní z registru:
       </p>
+      <div class="bo-profile clearfix" data-userid="{{g.user.id or ""}}"></div>
       <p>
         <form method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
