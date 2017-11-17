@@ -513,7 +513,7 @@ def polling_station():
     return render_template('polling_station.html', ballot_groups=ballot_groups)
 
 
-def permit_voting(ballot):
+def permit_voting(ballot, allowNotRunning = False):
     if g.user.already_voted(ballot):
         raise BallotBoxError(u"Již jste hlasoval/a.", 403)
     if not g.user.can_vote(ballot):
@@ -525,7 +525,7 @@ def permit_voting(ballot):
     if not ballot.approved:
         raise BallotBoxError(
             u"Tato volba nebyla schválena Volební komisí.", 404)
-    if not ballot.in_progress:
+    if not ballot.in_progress and not allowNotRunning:
         raise BallotBoxError(u"Tato volba nyní neprobíhá.", 404)
 
 
@@ -536,7 +536,7 @@ def polling_station_item(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    permit_voting(ballot)
+    permit_voting(ballot, allowNotRunning = True)
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html',
                                ballot=ballot)

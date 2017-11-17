@@ -1,3 +1,7 @@
+function cleanText(txt){
+    return $($.parseHTML(txt)).text().substring(0, 300);
+}
+
 $(document).ready(function() {
     $(".bo-profile").each(function() {
         var $this = $(this);
@@ -12,7 +16,7 @@ $(document).ready(function() {
                 try {
                     for (var i = 0; i < data.person.contacts.length; i++) {
                         var t = data.person.contacts[i].type;
-                        var v = data.person.contacts[i].value;
+                        var v = cleanText(data.person.contacts[i].value);
                         if (t == "email") {
                             html += '<a href="mailto:'+ v +'"><i class="fa fa-envelope fa-fw"></i> '+ v +'</a>';
                         } else if (t == "facebook_page") {
@@ -48,6 +52,9 @@ $(document).ready(function() {
                     if (data.person.cv_url) {
                         html += '<a href="' + data.person.cv_url + '"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
+                    if (data.person.description) {
+                        html += '<p>' + cleanText(data.person.description) + '</p>';
+                    }
                 } catch (e) {
                     console.error("Chyba při zobrazování kontaktu.");
                     console.error(e);
@@ -62,7 +69,7 @@ $(document).ready(function() {
             }
         });
     });
-
+    
     if ($('.bo-profile').length > 0) {
         $('.bo-profile-empty').html('<i class="fa fa-user fa-3x"></i>');
     }
