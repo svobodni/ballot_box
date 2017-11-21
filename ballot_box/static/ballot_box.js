@@ -11,8 +11,9 @@ $(document).ready(function() {
             url: BASE_URL+"registry/people/" + userid + ".json",
             success: function(data) {
                 var html = "";
-                html += '<img class="pull-left" src="' + data.person.photo_url + '" />';
-                html += '<div class="pull-left">&nbsp;</div><div class="pull-left">'
+                html += '<div class="pull-left col-md-6">';
+                html += '<div class="pull-left col-md-2"><img class="pull-left" src="' + data.person.photo_url + '" /></div>';
+                html += '<div class="pull-left col-md-4">'
                 try {
                     for (var i = 0; i < data.person.contacts.length; i++) {
                         var t = data.person.contacts[i].type;
@@ -52,15 +53,19 @@ $(document).ready(function() {
                     if (data.person.cv_url) {
                         html += '<a href="' + data.person.cv_url + '"><i class="fa fa-file-text-o fa-fw"></i> CV</a><br/>';
                     }
+                    html += "</div>"
                     if (data.person.description) {
-                        html += '<p>' + cleanText(data.person.description) + '</p>';
+                        html += "</div>"
+                        html += '<div class="pull-left col-md-5">' + cleanText(data.person.description);
                     }
-                } catch (e) {
+                }
+                catch (e) {
                     console.error("Chyba při zobrazování kontaktu.");
                     console.error(e);
                     console.error(data);
                 }
                 html += "</div>"
+
                 $this.html(html);
 
             },
