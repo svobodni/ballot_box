@@ -513,8 +513,8 @@ def polling_station():
     return render_template('polling_station.html', ballot_groups=ballot_groups)
 
 
-def permit_voting(ballot, allowNotRunning = False):
-    if g.user.already_voted(ballot):
+def permit_voting(ballot, allowNotRunning = False, allowAlreadyVoted = False):
+    if g.user.already_voted(ballot) and not allowAlreadyVoted:
         raise BallotBoxError(u"Již jste hlasoval/a.", 403)
     if not g.user.can_vote(ballot):
         raise BallotBoxError(u"Nemáte právo hlasovat.", 403)
@@ -536,7 +536,7 @@ def polling_station_item(ballot_id):
     ballot = db.session.query(Ballot).get(ballot_id)
     if ballot is None:
         abort(404)
-    permit_voting(ballot, allowNotRunning = True)
+    permit_voting(ballot, allowNotRunning = True, allowAlreadyVoted = True)
     if ballot.is_yes_no:
         return render_template('polling_station_mark_yes_no.html',
                                ballot=ballot)

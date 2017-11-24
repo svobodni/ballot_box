@@ -44,7 +44,7 @@
       {% elif not ballot.in_progress %}
         Nyní neprobíhá. <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary">Volební místnost</a>
       {% elif g.user.already_voted(ballot) %}
-        Již jste hlasoval/a.
+        Již jste hlasoval/a. <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary">Volební místnost</a>
       {% elif g.user.can_vote(ballot) %}
         <a href="{{url_for('polling_station_item', ballot_id=ballot.id)}}" class="btn btn-primary"><i class="fa fa-check-circle-o"></i> Hlasovat</a>
       {% else %}
