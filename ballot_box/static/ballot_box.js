@@ -12,8 +12,8 @@ $(document).ready(function() {
             success: function(data) {
                 var html = "";
                 html += '<div class="pull-left col-md-6">';
-                html += '<div class="pull-left col-md-2"><img class="pull-left" src="' + data.person.photo_url + '" /></div>';
-                html += '<div class="pull-left col-md-4">'
+                html += '<div class="pull-left col-md-4"><img class="pull-left" src="' + data.person.photo_url + '" /></div>';
+                html += '<div class="pull-left col-md-8">'
                 try {
                     for (var i = 0; i < data.person.contacts.length; i++) {
                         var t = data.person.contacts[i].type;
@@ -56,7 +56,7 @@ $(document).ready(function() {
                     html += "</div>"
                     if (data.person.description) {
                         html += "</div>"
-                        html += '<div class="pull-left col-md-5">' + cleanText(data.person.description);
+                        html += '<div class="pull-left col-md-6">' + cleanText(data.person.description);
                     }
                 }
                 catch (e) {

@@ -47,7 +47,7 @@
             <div class="panel-body">
               <div class="checkbox">
                 <label>
-                  {% if ballot.in_progress %}<input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">{% endif %}
+                  {% if ballot.in_progress and not g.user.already_voted(ballot) %}<input type="checkbox" class="ballot-option" name="option,{{option.id}}" value="1">{% endif %}
                   <strong>{{option.title}}</strong>
                 </label>
                 {{ballot_option_details(option)}}
@@ -56,10 +56,14 @@
           </div>
         {% endfor %}
         {% if ballot.in_progress %}
-        <p class="text-muted" id="remaining-votes-count"></p>
-        <button id="btn-continue" type="submit" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Pokračovat k potvrzení</button>
+          {% if g.user.already_voted(ballot) %}
+          Již jste hlasoval/a.
+          {% else %}
+          <p class="text-muted" id="remaining-votes-count"></p>
+          <button id="btn-continue" type="submit" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Pokračovat k potvrzení</button>
+          {% endif %}
         {% else %}
-        Tato volba nyní neprobíhá.
+          Tato volba nyní neprobíhá.
         {% endif %}
       </form>
     {% endcall %}

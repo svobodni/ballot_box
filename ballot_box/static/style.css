@@ -44,3 +44,7 @@ textarea#description {
 .bo-profile {
     margin: 8 0px;
 }
+
+.bo-profile img {
+    margin-bottom: 10px;
+}
