@@ -7,7 +7,7 @@ from os import urandom
 from base64 import b64encode
 
 from flask import render_template
-from flask.ext.mail import Message
+from flask_mail import Message
 from celery.utils.log import get_task_logger
 
 from ballot_box import celery, db, mail, app
