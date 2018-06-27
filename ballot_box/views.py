@@ -13,7 +13,7 @@ from base64 import b64encode, b64decode
 
 import pdfkit
 import bleach
-from flask.ext.mail import Message
+from flask_mail import Message
 from flask import render_template, g, request, redirect, \
     url_for, session, abort, flash, make_response, Markup
 from wtforms.validators import ValidationError
@@ -228,7 +228,7 @@ def ballot_edit(ballot_id):
         abort(404)
     if ballot.in_progress or ballot.is_finished:
         abort(403)
-    form = BallotEditForm(request.form, ballot)
+    form = BallotEditForm(request.form, obj=ballot)
     if form.validate_on_submit():
         form.populate_obj(ballot)
         ballot.description = sanitize_html(ballot.description)
@@ -427,7 +427,7 @@ def ballot_protocol_edit(protocol_id):
     protocol = db.session.query(BallotProtocol).get(protocol_id)
     if protocol is None:
         abort(404)
-    form = BallotProtocolEditForm(request.form, protocol)
+    form = BallotProtocolEditForm(request.form, obj=protocol)
     if form.validate_on_submit():
         form.populate_obj(protocol)
         protocol.body_html = sanitize_html(protocol.body_html, extended=True)
@@ -864,7 +864,7 @@ def settings():
     if settings is None:
         settings = Settings(id=g.user.id, signature=default_signature())
 
-    form = SettingsForm(request.form, settings)
+    form = SettingsForm(request.form, obj=settings)
 
     if request.method == "POST" and form.validate_on_submit():
         form.populate_obj(settings)

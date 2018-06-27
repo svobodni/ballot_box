@@ -4,8 +4,8 @@ import os
 
 from celery import Celery
 from flask import Flask
-from flask.ext.mail import Mail
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_wtf.csrf import CsrfProtect
 from werkzeug.contrib.cache import FileSystemCache

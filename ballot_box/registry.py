@@ -4,7 +4,7 @@ import json
 
 import requests
 from flask import g, request, render_template
-from flask.ext.mail import Message
+from flask_mail import Message
 
 from ballot_box import app, cache, mail, BallotBoxError
 

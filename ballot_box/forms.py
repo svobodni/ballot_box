@@ -2,7 +2,7 @@
 
 import datetime
 
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms import SubmitField, validators
 from wtforms_alchemy import model_form_factory
 from wtforms_components import DateRange
