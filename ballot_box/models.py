@@ -274,6 +274,10 @@ class Ballot(db.Model):
         return self.protocols.filter_by(approved=True).first()
 
     @property
+    def count_voted(self):
+        return self.voters.filter(Voter.voted_at < datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
+
+    @property
     def mail_greeting(self):
         return UNITS_GREETING.get(self.unit.code, "")
 

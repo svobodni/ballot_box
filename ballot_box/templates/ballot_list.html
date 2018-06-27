@@ -68,7 +68,8 @@
               {% endif %}
               {% if not ballot.approved and not ballot.cancelled %}
                 <span class="label label-warning">Návrh</span>
-              {% endif %}
+              {% endif %}<br />
+                <span title="Počet odevzdaných hlasů do včerejší půlnoci.">Odvoleno: {{ballot.count_voted}}</span>
             </td>
             <td>
               {% if not ballot.in_progress and not ballot.is_finished %}
