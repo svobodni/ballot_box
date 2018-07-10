@@ -8,6 +8,7 @@
         do {{ballot.candidate_signup_until|fmt_dt_range}}<br/>
     {% endif %}
     Počet hlasů: {{ballot.max_votes}} &nbsp;&nbsp; Počet možností: {{ballot.options|length}}<br/>
+    {% if g.user.can_vote(ballot) or g.user.already_voted(ballot) %}Počet odevzdaných hlasů do včerejší půlnoci: {{ballot.count_voted}}<br/>{% endif %}
     Hlasovací právo: {{ballot.unit}} {% if ballot.supporters_too %} i příznivci{% endif %}{% if ballot.quorum  %}<br/>
     Kvórum: {{ballot.quorum}} hlas{% if ballot.quorum > 1  %}{% if ballot.quorum > 4  %}ů{% else %}y{% endif %}{% endif %}{% endif %}
   </p>
