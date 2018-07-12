@@ -229,6 +229,7 @@ def ballot_edit(ballot_id):
     if ballot.in_progress or ballot.is_finished:
         abort(403)
     form = BallotEditForm(request.form, obj=ballot)
+    mc = registry.registry_body_members()
     if form.validate_on_submit():
         form.populate_obj(ballot)
         ballot.description = sanitize_html(ballot.description)
@@ -244,7 +245,7 @@ def ballot_edit(ballot_id):
         flash(u"Hlasování bylo úspěšně změněno." if ballot.type == "VOTING"
               else u"Volba byla úspěšně změněna.", "success")
         return redirect(url_for("ballot_list"))
-    return render_template('ballot_edit.html', form=form)
+    return render_template('ballot_edit.html', form=form, membercounts = mc)
 
 
 @app.route("/ballot/<int:ballot_id>/options/", methods=('GET', 'POST'))

@@ -173,6 +173,10 @@ class BallotEditForm(ModelForm):
             "candidate_signup_until": {
                 "validators": [validators.Optional()],
                 "default": lambda: midnight(days=1),
+            },
+            "quorum": {
+                "description": u"Minimální počet hlasů, nutných k zvolení. Nechte prázdné, pokud nechcete aplikovat.<span><br />" + \
+                               u"Momentální počet členů zvolené jednotky je <span id=\"unit_members_count\">?</span>, nadpoloviční většina <b>?</b>.</span>"
             }
         }
 BallotEditForm.submit = SubmitField(u'Uložit')
