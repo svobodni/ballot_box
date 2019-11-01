@@ -38,7 +38,8 @@
       {% if ballot.cancelled %}
         Zrušeno.
       {% elif ballot.is_finished %}
-        Ukončeno. <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-default"><i class="fa fa-list-ol"></i> Zobrazit výsledek</a>
+        Ukončeno, {% if not g.user.already_voted(ballot) %}ne{% endif %}hlasoval/a jste. 
+        <a href="{{url_for('polling_station_result', ballot_id=ballot.id)}}" class="btn btn-default"><i class="fa fa-list-ol"></i> Zobrazit výsledek</a>
         {% if ballot.approved_protocol %}
           <a href="{{url_for('protocol_item', protocol_id=ballot.approved_protocol.id)}}" class="btn btn-default"><i class="fa fa-file-text-o"></i> Volební protokol</a>
         {% endif %}
