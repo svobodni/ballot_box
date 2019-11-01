@@ -9,7 +9,7 @@
         memberCounts = {{ membercounts|tojson|safe }}
       </script>
     <h3>Upravit volbu nebo hlasování</h3>
-    {{ wtf.quick_form(form, form_type="horizontal", button_map={"submit":"primary"}) }}
+    {{ wtf.quick_form(form, form_type="horizontal", button_map={"submit":"primary ballotdur_confirm"}) }}
   </div>
 </div>
 {% endblock %}
