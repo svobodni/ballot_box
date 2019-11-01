@@ -107,6 +107,22 @@ $(document).ready(function() {
             })(24, [])
     });
 
+    function parseDatetime(d)
+    {
+        return new Date(parseInt(d.substr(0, 4)), parseInt(d.substr(5, 2)), parseInt(d.substr(8, 2)), 
+        parseInt(d.substr(11, 2)), parseInt(d.substr(14, 2)), parseInt(d.substr(17, 2)));
+    }
+
+
+    var elems = $('.ballotdur_confirm');
+    var confirmIt = function (e) {
+        var ballotDuration = (parseDatetime($('#finish_at').val()) - parseDatetime($('#begin_at').val()))   / (1000*60*60*24);
+        if (ballotDuration < 7) if (!confirm('Volba je kratší než týden (' + ballotDuration.toFixed(2) + ' dnů), chcete přesto uložit?' )) e.preventDefault();
+    };
+    for (var i = 0, l = elems.length; i < l; i++) {
+        elems[i].addEventListener('click', confirmIt, false);
+    }
+
     $('select#unit').on('change', function () {
         var selected = $(this).val();
         var result = $('#unit_members_count');
