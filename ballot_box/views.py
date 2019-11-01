@@ -27,7 +27,7 @@ from models import Connection, User, Ballot, \
 from forms import BallotForm, BallotEditForm, \
     BallotProtocolForm, BallotProtocolEditForm, SettingsForm
 from registry import registry_request, send_vote_confirmation, \
-    get_jwt, get_people
+    get_jwt, get_people, registry_set_winner
 
 
 def sanitize_html(html, extended=False):
@@ -839,11 +839,26 @@ def send_announcement(protocol_id):
 
         flash(u"Výsledek volby oznámen.", "success")
     else:
-        flash(u"Oznámení nebylo odesláno na %s." % ", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), "danger")
+        ret = ""
+        if protocol.ballot.is_election:
+            result = ballot_result(protocol.ballot)
+            print(result)
+            
+
+            ret = registry_set_winner(1, 1, datetime.datetime.now(), add_years(datetime.datetime.now(), 2))
+
+        flash(u"Oznámení nebylo odesláno na %s. %s" % (", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), ret.json()["person_name"]), "danger")
     
     return redirect(url_for("ballot_protocol_list",
                             ballot_id=protocol.ballot_id))
 
+
+def add_years(dt, years):
+    try:
+        dt = dt.replace(year=dt.year+years) - datetime.timedelta(days=1)
+    except ValueError:
+        dt = dt.replace(year=dt.year+years, day=dt.day-1)  # leap year
+    return dt
 
 def default_signature():
     return u'\n'.join([

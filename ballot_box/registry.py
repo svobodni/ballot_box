@@ -25,6 +25,22 @@ def registry_request(resource, jwt=None):
     return requests.get(app.config["REGISTRY_URI"] + resource,
                         headers=headers)
 
+def registry_post(resource, datadict=None, jwt=None):
+    jwt = get_jwt(jwt)
+    headers = {"Authorization": "Bearer {}".format(jwt),
+               "Content-Type": "application/json"}
+    return requests.post(app.config["REGISTRY_URI"] + resource,
+                        data = datadict,
+                        headers = headers)
+
+
+def registry_set_winner(person_id, body_id, since, till, membertype = "Member"):
+    since = since.strftime("%Y-%m-%d")
+    till = till.strftime("%Y-%m-%d")
+    data = '{"role": {"person_id": %d, "body_id": %d, "since": "%s", "till": "%s", "type": "%s"} }' % (
+           person_id, body_id, since, till, membertype)
+    return registry_post("/roles.json", data)
+
 
 def registry_units():
     units = [("country,1", u"Celá republika")]
