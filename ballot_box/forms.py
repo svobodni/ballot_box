@@ -3,7 +3,7 @@
 import datetime
 
 from flask_wtf import Form
-from wtforms import SubmitField, validators
+from wtforms import SubmitField, validators, SelectField, DateField
 from wtforms_alchemy import model_form_factory
 from wtforms_components import DateRange
 from wtforms_components.widgets import BaseDateTimeInput
@@ -11,7 +11,8 @@ from wtforms_components.widgets import BaseDateTimeInput
 # The variable db here is a SQLAlchemy object instance from
 # Flask-SQLAlchemy package
 from ballot_box import db
-from models import Ballot, BallotProtocol, Settings
+from models import Ballot, BallotProtocol, Settings, UNITS
+from utils import add_years
 
 # Workaround to fix lambdas in DateRange(min)
 BaseDateTimeInput.range_validator_class = int
@@ -201,3 +202,12 @@ class SettingsForm(ModelForm):
         model = Settings
         only = ["signature"]
 SettingsForm.submit = SubmitField(u'Uložit')
+
+
+class ExportResultsForm(Form):
+    body = SelectField(u'Jednotka', choices=filter(lambda o: o[0][:4] == "body", UNITS))
+    membertype = SelectField(u'Funkce', choices=[('Member', u'Člen'), ('Coordinator', u'Koordinátor'), ('Vicepresident', u'Místopředseda'), ('President', u'Předseda')])
+    since = DateField(u'Od', format='%Y-%m-%d', default = datetime.datetime.now())
+    till = DateField(u'Do', format='%Y-%m-%d', default = add_years(datetime.datetime.now(), 2))
+    
+ExportResultsForm.submit = SubmitField(u'Exportovat')

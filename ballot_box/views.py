@@ -23,11 +23,12 @@ from . import cache
 from utils import compute_hash_base, DAYS_RANGE
 from ballot_box import app, db, mail, tasks, BallotBoxError, registry
 from models import Connection, User, Ballot, \
-    BallotOption, Vote, Voter, BallotProtocol, Settings
+    BallotOption, Vote, Voter, BallotProtocol, Settings, UNITS
 from forms import BallotForm, BallotEditForm, \
-    BallotProtocolForm, BallotProtocolEditForm, SettingsForm
+    BallotProtocolForm, BallotProtocolEditForm, SettingsForm, \
+    ExportResultsForm
 from registry import registry_request, send_vote_confirmation, \
-    get_jwt, get_people
+    get_jwt, get_people, registry_set_winner
 
 
 def sanitize_html(html, extended=False):
@@ -690,6 +691,7 @@ def ballot_result(ballot):
             "title": db_option.title,
             "votes": defaultdict(list),
             "elected": False,
+            "user_id": db_option.user_id,
         }
         for db_vote in db_option.votes:
             option["votes"][db_vote.value].append(db_vote.hash_digest)
@@ -835,14 +837,43 @@ def send_announcement(protocol_id):
         protocol.announced = True
         db.session.commit()
 
-        #TODO: pass via api directly to registry
-
         flash(u"Výsledek volby oznámen.", "success")
     else:
-        flash(u"Oznámení nebylo odesláno na %s." % ", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"]), "danger")
+        flash(u"Oznámení nebylo odesláno na %s." % (", ".join(app.config["ANNOUNCE_RESULTS_RECIPIENTS"])), "danger")
     
     return redirect(url_for("ballot_protocol_list",
                             ballot_id=protocol.ballot_id))
+
+@app.route("/export_results/<int:protocol_id>/", methods=('GET', 'POST'))
+@app.route("/export_zvolenych/<int:protocol_id>/", methods=('GET', 'POST'))
+@login_required
+def export_results(protocol_id):
+    if not g.user.can_create_ballot():
+        abort(403)
+
+    protocol = db.session.query(BallotProtocol).get(protocol_id)
+
+    if not protocol.ballot.is_election:
+        abort(403)
+
+    elected = filter(lambda o: o["elected"], ballot_result(protocol.ballot))
+
+    form = ExportResultsForm(request.form)
+
+    if request.method == "POST" and form.validate_on_submit():
+        people = []
+        body = int(form.data["body"].split(',')[1])
+        for person in elected:
+            ret = registry_set_winner(person["user_id"], body, form.data["since"], form.data["till"], form.data["membertype"])
+            people.append(ret.json()["person_name"])
+
+        flash(u"Do registru bylo exportováno %d lidí (%s)." % (len(people), ','.join(people)), "success")
+        return redirect(url_for("ballot_protocol_list",
+                            ballot_id=protocol.ballot_id))
+
+    return render_template('export_results.html', elected=elected, 
+                           ballot=protocol.ballot_id, form=ExportResultsForm())
+
 
 
 def default_signature():
