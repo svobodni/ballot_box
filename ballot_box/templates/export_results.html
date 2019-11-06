@@ -1,0 +1,20 @@
+{% from '_macros.html' import  tinymce %}
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block body %}
+{{ tinymce(extended=True) }}
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <h3>Exportovat výsledky do registru</h3>
+    Následující lidé budou exportováni do registru:
+    <ul>{% for option in elected %}
+    <li>
+      <b>{{option["title"]}}</b> (ID: {{option["user_id"]}})
+    </li>
+    {% endfor %} 
+    </ul>
+    Kam a na jak dlouho byly zvoleni?
+    {{ wtf.quick_form(form, form_type="horizontal", button_map={"submit":"primary"}) }}
+  </div>
+</div>
+{% endblock %}
