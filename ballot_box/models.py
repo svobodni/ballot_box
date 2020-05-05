@@ -96,10 +96,15 @@ class User(object):
         return False
 
     def has_right_to_vote(self, ballot):
-        if not ballot.supporters_too and not self.is_party_member:
-            return False
+        if ballot.supporters_too:
+            if self.is_party_member:  # quick and dirty fix - because of current stupid stanovy
+                return True           # members can vote in all "supporters" ballots
+        else:
+            if not self.is_party_member:
+                return False
         (unit_type, unit_id) = tuple(ballot.unit.code.split(','))
         return self.is_in_unit(unit_type, int(unit_id))
+
 
     def already_voted(self, ballot):
         return bool(ballot.voters.filter_by(person_id=self.id).first())
