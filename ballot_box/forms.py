@@ -2,7 +2,7 @@
 
 import datetime
 
-from flask_wtf import Form
+from flask_wtf import Form, FlaskForm
 from wtforms import SubmitField, validators, SelectField, DateField
 from wtforms_alchemy import model_form_factory
 from wtforms_components import DateRange
@@ -204,7 +204,7 @@ class SettingsForm(ModelForm):
 SettingsForm.submit = SubmitField(u'Uložit')
 
 
-class ExportResultsForm(Form):
+class ExportResultsForm(FlaskForm):
     body = SelectField(u'Jednotka', choices=filter(lambda o: o[0][:4] == "body", UNITS))
     membertype = SelectField(u'Funkce', choices=[('Member', u'Člen'), ('Coordinator', u'Koordinátor'), ('Vicepresident', u'Místopředseda'), ('President', u'Předseda')])
     since = DateField(u'Od', format='%Y-%m-%d', default = datetime.datetime.now())
