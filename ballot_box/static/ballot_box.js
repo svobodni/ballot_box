@@ -18,6 +18,15 @@ $(document).ready(function() {
                     for (var i = 0; i < data.person.contacts.length; i++) {
                         var t = data.person.contacts[i].type;
                         var v = cleanText(data.person.contacts[i].value);
+                        if (["facebook_profile", "facebook_page"].includes(t)) {
+                            if (! v.startsWith("http") & v.includes("facebook.com")) {
+                                // Odkaz je ve formátu www.facebook.com/jiri.pesik/, je třeba přidat https
+                                v = 'https://' + v;
+                            } else if (! v.startsWith("http") & ! v.includes("facebook.com")) {
+                                // Je zadáno pouze ID profilu
+                                v = 'www.facebook.com/' + v;
+                            }
+                        }
                         if (t == "email") {
                             html += '<a href="mailto:'+ v +'"><i class="fa fa-envelope fa-fw"></i> '+ v +'</a>';
                         } else if (t == "facebook_page") {
