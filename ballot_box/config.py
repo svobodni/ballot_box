@@ -28,7 +28,10 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-
+    REGISTRY_URI = "https://registr-test.svobodni.cz"
+    CELERY_BROKER_URL = "redis://redis:6379/11"
+    CELERY_RESULT_BACKEND = "redis://redis:6379/11"
+    SERVER_NAME = "localhost:3001"
 
 class TestingConfig(Config):
     TESTING = True

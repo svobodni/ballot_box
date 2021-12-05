@@ -1,0 +1,16 @@
+Babel
+bleach
+celery
+Flask==0.12.5
+Flask-Bootstrap
+Flask-Mail
+Flask-SQLAlchemy
+Flask-WTF==0.13.1
+werkzeug==0.11.10
+pdfkit
+requests
+sqlalchemy-utils==0.30.1
+sqlalchemy==1.3.23
+WTForms-Components==0.9.9
+wtforms==2.3.3
+WTForms-Alchemy==0.14.0
