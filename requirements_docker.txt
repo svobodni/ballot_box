@@ -6,7 +6,7 @@ Flask-Bootstrap
 Flask-Mail
 Flask-SQLAlchemy
 Flask-WTF==0.13.1
-werkzeug==0.11.10
+werkzeug==0.15.3
 pdfkit
 requests
 sqlalchemy-utils==0.30.1
