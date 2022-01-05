@@ -197,8 +197,12 @@ def logout():
 def ballot_list():
     if not g.user.can_list_ballot():
         abort(403)
+    maxi = int(request.args.get("maxi", 10))
     ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc())
-    return render_template('ballot_list.html', ballots=ballots)
+    ballots = list(ballots)
+    maxi_last = len(ballots)
+    ballots = ballots[:maxi]
+    return render_template('ballot_list.html', ballots=ballots, maxi = maxi, maxi_last = maxi_last)
 
 
 @app.route("/ballot/new/", methods=('GET', 'POST'))

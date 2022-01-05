@@ -96,6 +96,15 @@
         {% endfor %}
       </tbody>
     </table>
+    <p>
+      {% set maxi_next = maxi+20 %}
+      {% if maxi_next < maxi_last %}
+        <a href="{{url_for('ballot_list', maxi = maxi_next)}}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Načíst více</a>
+      {% endif %}
+      {% if maxi < maxi_last %}
+        <a href="{{url_for('ballot_list', maxi = maxi_last)}}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Načíst vše</a>
+      {% endif %}
+    </p>
   </div>
 </div>
 </div>{# end container-fluid #}
