@@ -4,6 +4,7 @@ services:
     build: ./
     volumes:
       - ./:/app
+      - tmp:/tmp
     ports:
       - "3001:3001"
     depends_on:
@@ -11,3 +12,5 @@ services:
   redis:
     image: redis
     restart: always
+volumes:
+  tmp:
