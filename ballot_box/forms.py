@@ -28,7 +28,7 @@ class ModelForm(BaseModelForm):
         return db.session
 
 
-def morning(days=1, at=9):
+def morning(days=1, at=8):
     return ((datetime.datetime.now() + datetime.timedelta(days=days))
             .replace(hour=at, minute=0, second=0))
 
@@ -37,6 +37,9 @@ def midnight(days=10):
     return ((datetime.datetime.now() + datetime.timedelta(days=days))
             .replace(hour=23, minute=59, second=59))
 
+def endofvotingday(days=10):
+    return ((datetime.datetime.now() + datetime.timedelta(days=days))
+            .replace(hour=20, minute=00, second=59))
 
 def min_timedelta(*args, **kwargs):
     return lambda: datetime.datetime.now() \
@@ -93,7 +96,7 @@ class BallotForm(ModelForm):
                         min=min_timedelta(hours=1),
                         message=u"Začátek musí být nejdříve za hodinu."),
                 ],
-                "default": lambda: morning(days=3, at=9),
+                "default": lambda: morning(days=3, at=8),
             },
             "finish_at": {
                 "validators": [
@@ -102,7 +105,7 @@ class BallotForm(ModelForm):
                         difference=datetime.timedelta(hours=72),
                         message=u"Trvání musí být nejméně 72 hodin."),
                     ],
-                "default": lambda: midnight(),
+                "default": lambda: endofvotingday(),
                 "description": u"Trvání musí být nejméně 72 hodin.",
             },
             "description": {
@@ -123,7 +126,7 @@ class BallotForm(ModelForm):
                         enabled="candidate_self_signup"
                     ),
                 ],
-                "default": lambda: midnight(days=1),
+                "default": lambda: endofvotingday(days=1),
                 "description": u"Nejméně 24 hodin před začátkem voleb.",
             },
             "quorum": {
@@ -173,7 +176,7 @@ class BallotEditForm(ModelForm):
             },
             "candidate_signup_until": {
                 "validators": [validators.Optional()],
-                "default": lambda: midnight(days=1),
+                "default": lambda: endofvotingday(days=1),
             },
             "quorum": {
                 "description": u"Minimální počet hlasů, nutných k zvolení. Nechte prázdné, pokud nechcete aplikovat.<span><br />" + \
