@@ -193,12 +193,13 @@ def logout():
 
 
 @app.route("/ballot/")
+@app.route("/ballot/<int:page>/")
 @login_required
-def ballot_list():
+def ballot_list(page=0):
     if not g.user.can_list_ballot():
         abort(403)
-    ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc())
-    return render_template('ballot_list.html', ballots=ballots)
+    ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc())[page*10:page*10+10]
+    return render_template('ballot_list.html', ballots=ballots, page=page)
 
 
 @app.route("/ballot/new/", methods=('GET', 'POST'))

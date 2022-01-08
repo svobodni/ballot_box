@@ -97,6 +97,12 @@
       </tbody>
     </table>
   </div>
+  <div style="text-align:right; margin-right:2vh">
+{% if page>0 %}
+    <a class="btn btn-default btn-xs" href="{{ url_for('ballot_list', page=page-1) }}"> Předchozí </a>
+{% endif %}
+    <a class="btn btn-default btn-xs" href="{{ url_for('ballot_list', page=page+1) }}"> Další </a>
+  </div>
 </div>
 </div>{# end container-fluid #}
 <div class="container">
