@@ -25,7 +25,9 @@
               {% if protocol.approved and not protocol.announced %} 
               <a href="{{url_for('send_announcement', protocol_id=protocol.id)}}" class="btn btn-default btn-xs send-announcement" title="Ohlásit výsledek volby do registru"><i class="fa fa-envelope"></i></a>
               {% if protocol.ballot.is_election %} 
+              <!-- hide 'export to register' due to communication issue
               <a href="{{url_for('export_results', protocol_id=protocol.id)}}" class="btn btn-default btn-xs export-results" title="Exportovat výsledek volby do registru"><i class="fa fa-database"></i></a>
+              -->
               {% endif %}{% endif %}
             </td>
           </tr>
