@@ -198,7 +198,7 @@ def ballot_list():
     if not g.user.can_list_ballot():
         abort(403)
     maxi = int(request.args.get("maxi", 10))
-    ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc())
+    ballots = db.session.query(Ballot).order_by(Ballot.begin_at.desc(), Ballot.id.desc())
     ballots = list(ballots)
     maxi_last = len(ballots)
     ballots = ballots[:maxi]
