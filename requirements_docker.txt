@@ -1,7 +1,7 @@
 Babel
 bleach
 celery
-Flask==0.12.5
+Flask==1.0
 Flask-Bootstrap
 Flask-Mail
 Flask-SQLAlchemy
